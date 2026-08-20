@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0d" />
+  <title>密室：零点校验</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <audio id="bgm" src="assets/audio/bgm.mp3" loop preload="auto"></audio>
+
+    <header class="hud">
+      <div class="brand">
+        <span class="brand-mark">TF</span>
+        <div><strong>零点校验</strong><small id="hudScene">MEMORY VERIFY · 0 / 10</small></div>
+      </div>
+      <div class="hud-actions">
+        <button id="btnBgm" class="hud-btn" aria-label="BGM 开关">♫ BGM</button>
+        <button id="btnArchive" class="hud-btn">校验档案</button>
+        <button id="btnSceneMap" class="hud-btn">场景回看</button>
+        <button id="btnRestart" class="hud-btn danger">重新开始</button>
+        <button id="btnSupport" class="hud-btn support hidden">催更</button>
+      </div>
+    </header>
+
+    <main id="gameRoot"></main>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+    <div id="modalRoot"></div>
+
+    <div class="portrait-warning">
+      <div>请横屏体验</div>
+      <small>这套密室按手机横屏与桌面宽屏设计。</small>
+    </div>
+  </div>
+
+  <script src="game-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
