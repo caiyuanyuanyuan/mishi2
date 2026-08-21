@@ -242,7 +242,7 @@
   }
 
   function puzzleS2P1(mount){
-    const chars=['强','花','壮','香','锤'], families=['爸爸','妈妈','哥哥','妹妹','团宠']; const ans={强:['zj','爸爸'],花:['zzy','妈妈'],壮:['zzx','哥哥'],香:['sxh','妹妹'],锤:['zh','团宠']};
+    const chars=['强','花','壮','香','锤'], families=['爸爸','妈妈','弟弟','姐姐','团宠']; const ans={强:['zj','爸爸'],花:['zzy','妈妈'],壮:['zzx','弟弟'],香:['sxh','姐姐'],锤:['zh','团宠']};
     mount.insertAdjacentHTML('beforeend',`<div class="rule-card">冰箱磁贴只写了五个字：“强 花 壮 香 锤”。给每个角色字选择成员，再选择家庭身份。</div><table class="matrix"><tr><th>角色字</th><th>成员</th><th>家庭身份</th></tr>${chars.map(c=>`<tr><td><b>${c}</b></td><td><select class="select-input who" data-c="${c}">${memberOptions()}</select></td><td><select class="select-input fam" data-c="${c}"><option value="">请选择</option>${families.map(x=>`<option>${x}</option>`).join('')}</select></td></tr>`).join('')}</table><div class="input-row" style="margin-top:12px"><button class="verify-btn" id="verify">组合角色卡</button></div><div class="feedback" id="fb"></div>`);
     mount.querySelector('#verify').onclick=()=>{const ok=chars.every(c=>mount.querySelector(`.who[data-c="${c}"]`).value===ans[c][0]&&mount.querySelector(`.fam[data-c="${c}"]`).value===ans[c][1]); if(ok) finishAndRefresh(2,0,'五个角色已确认'); else feedback(mount.querySelector('#fb'),'这个人的另外两条信息好像对不上。');};
   }
@@ -280,7 +280,7 @@
   const quotes=[
     ['A','他们生三个，感情能不好嘛。','sxh'],['B','我只是一个摄影师，没有和过稀泥。','zh'],['C','小宝甜还是青提甜～','zzy'],['D','就是鸡丝凉面！没有错啊~','zzx'],['E','哪有持续！拿过来呀～','zj']
   ];
-  const mostTags=[['最想收购 sdfj 的人','zj'],['最没办法的人','zzx'],['耍赖最先开团的人','zzy'],['最直的人','zh'],['如果变成女生，想把他们一个个亲一遍的人','sxh']];
+  const mostTags=[['最想收购 sdfj 的人','zj'],['最没办法的人','zzx'],['最熟练掌握登员使用手册的人','zzy'],['最直的人','zh'],['如果变成女生，想把他们一个个亲一遍的人','sxh']];
   const games=[['憋笑挑战','zzx'],['认人游戏——漫威英雄版','zzy'],['谁是卧底版恐怖箱','zj'],['蒙眼版 123 木头人','zh'],['不能做挑战','sxh']];
 
   function puzzleS5P1(mount){
