@@ -242,7 +242,7 @@
   }
 
   function puzzleS2P1(mount){
-    const chars=['强','花','壮','香','锤'], families=['爸爸','妈妈','弟弟','姐姐','团宠']; const ans={强:['zj','爸爸'],花:['zzy','妈妈'],壮:['zzx','弟弟'],香:['sxh','姐姐'],锤:['zh','团宠']};
+    const chars=['强','花','壮','香','锤'], families=['爸爸','妈妈','哥哥','妹妹','团宠']; const ans={强:['zj','爸爸'],花:['zzy','妈妈'],壮:['zzx','哥哥'],香:['sxh','妹妹'],锤:['zh','团宠']};
     mount.insertAdjacentHTML('beforeend',`<div class="rule-card">冰箱磁贴只写了五个字：“强 花 壮 香 锤”。给每个角色字选择成员，再选择家庭身份。</div><table class="matrix"><tr><th>角色字</th><th>成员</th><th>家庭身份</th></tr>${chars.map(c=>`<tr><td><b>${c}</b></td><td><select class="select-input who" data-c="${c}">${memberOptions()}</select></td><td><select class="select-input fam" data-c="${c}"><option value="">请选择</option>${families.map(x=>`<option>${x}</option>`).join('')}</select></td></tr>`).join('')}</table><div class="input-row" style="margin-top:12px"><button class="verify-btn" id="verify">组合角色卡</button></div><div class="feedback" id="fb"></div>`);
     mount.querySelector('#verify').onclick=()=>{const ok=chars.every(c=>mount.querySelector(`.who[data-c="${c}"]`).value===ans[c][0]&&mount.querySelector(`.fam[data-c="${c}"]`).value===ans[c][1]); if(ok) finishAndRefresh(2,0,'五个角色已确认'); else feedback(mount.querySelector('#fb'),'这个人的另外两条信息好像对不上。');};
   }
