@@ -24,7 +24,7 @@ const QUOTES = {
 const MOST_Q = [
   ['最想收购 sdfj 的人','zj'],
   ['最没办法的人','zzx'],
-  ['最熟练掌握登员使用手册的人','zzy'],
+  ['耍赖最先开团的人','zzy'],
   ['最直的人','zh'],
   ['变成女生想把他们一个个亲一遍的人','sxh']
 ];
@@ -307,7 +307,7 @@ function addHotspot({x,y,w,h,tip,action,cls='',fragment=null,disabled=false}){
 
 const CLUE_HTML = {
   s1profiles:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><div class="memberMini"><img src="${MEMBERS[id].img}"><b>${MEMBERS[id].name}</b></div><p>生日：${pad2(MEMBERS[id].month)} 月 ${pad2(MEMBERS[id].day)} 日</p><p>星座：${MEMBERS[id].zodiac}</p><p>MBTI：${MEMBERS[id].mbti}</p></div>`).join('')}</div>`,
-  s1interview:`<div class="grid two"><div class="card"><h3>采访索引 A</h3><p>“最想收购 sdfj”——张极</p><p>“最没办法”——朱志鑫</p></div><div class="card"><h3>采访索引 B</h3><p>“使用手册”——张泽禹</p><p>“最直”——左航</p><p>“变成女生想……”——苏新皓</p></div></div>`,
+  s1interview:`<div class="grid two"><div class="card"><h3>采访索引 A</h3><p>“最想收购 sdfj”——张极</p><p>“最没办法”——朱志鑫</p></div><div class="card"><h3>采访索引 B</h3><p>“耍赖最先开团”——张泽禹</p><p>“最直”——左航</p><p>“变成女生想……”——苏新皓</p></div></div>`,
   s2ears:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><p>耳洞记录：<strong class="gold">${MEMBERS[id].ear}</strong></p></div>`).join('')}</div>`,
   s2family:`<div class="grid two"><div class="card"><h3>家庭提示卡 01</h3><p>张极：一位姐姐。</p></div><div class="card"><h3>家庭提示卡 02</h3><p>苏新皓：一位弟弟。</p></div></div><p class="tiny">其余三份家庭字段为空。</p>`,
   s2pets:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><p>当前家里宠物：<strong class="gold">${MEMBERS[id].pet}</strong></p></div>`).join('')}</div>`,
