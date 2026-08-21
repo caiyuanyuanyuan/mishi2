@@ -1,231 +1,769 @@
-window.GAME_DATA = (() => {
-  const members = [
-    { id:'zzx', name:'朱志鑫', image:'assets/members/zhuzhixin.jpg', english:'Twenty-two X', month:11, day:19, mbti:'INFP', city:'重庆', ear:9, sibling:0 },
-    { id:'zh', name:'左航', image:'assets/members/zuohang.jpg', english:'LEFT', month:5, day:22, mbti:'INFP', city:'重庆', ear:2, sibling:0 },
-    { id:'zzy', name:'张泽禹', image:'assets/members/zhangzeyu.jpg', english:'ZACK / B.A.O', month:4, day:30, mbti:'ESTJ', city:'哈尔滨', ear:0, sibling:0 },
-    { id:'zj', name:'张极', image:'assets/members/zhangji.jpg', english:'Jeremy', month:2, day:3, mbti:'INFP', city:'常州', ear:0, sibling:1 },
-    { id:'sxh', name:'苏新皓', image:'assets/members/suxinhao.jpg', english:'SU', month:1, day:12, mbti:'ENTJ', city:'重庆', ear:0, sibling:1 }
-  ];
+'use strict';
 
-  const scenes = [
-    {id:1,title:'五份档案',image:'assets/backgrounds/scene01_memory_verify.png',objective:'先确认，你认得的是五个人，不是五张脸。',theme:'archive'},
-    {id:2,title:'强花壮香锤',image:'assets/backgrounds/scene02_role_focus.png',objective:'先叫角色名，再记关系。',theme:'warm'},
-    {id:3,title:'0、2、9',image:'assets/backgrounds/scene03_personal_lockers.jpg',objective:'小细节被拆开后，会重新变成一条可读的顺序。',theme:'locker'},
-    {id:4,title:'两张表叠在一起',image:'assets/backgrounds/scene04_double_tag.png',objective:'两层分类还不够，第三个条件才能让每个人唯一。',theme:'logic'},
-    {id:5,title:'谁说的，谁玩的，谁最……',image:'assets/backgrounds/scene05_review_room.jpg',objective:'一句话不够。至少三条线索都对上，才算同一个人。',theme:'review'},
-    {id:6,title:'五首舞台',image:'assets/backgrounds/scene06_stage_planning.png',objective:'不要只数出现次数。先用问题选人，再读取次数。',theme:'stageplan'},
-    {id:7,title:'从哪里来到这里',image:'assets/backgrounds/scene07_city_route.png',objective:'三个出发城市，五条线，最后都指向同一个地方。',theme:'route'},
-    {id:8,title:'不背曲序',image:'assets/backgrounds/scene08_filter_focus.png',objective:'筛选标题结构。',theme:'filter'},
-    {id:9,title:'润！闷。哈？哟～',image:'assets/backgrounds/scene09_voice_control.png',objective:'26 键。',theme:'voice'},
-    {id:10,title:'共同名字',image:'assets/backgrounds/scene10_front.jpg',backImage:'assets/backgrounds/scene10_back.jpg',objective:'不是任何一个人的名字，是五个人共同使用的名字。',theme:'final'}
-  ];
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const STORAGE_KEY = 'sixthArchiveEscape_v1';
+const MEMBER_ORDER = ['zzx','zzy','zj','zh','sxh'];
 
-  const puzzleMeta = {
-    1:[
-      {title:'英文名归档',sub:'把五张英文名卡归回五份成员档案。',hints:['英文名不是随机生成的编号。','有两个英文名几乎直接和成员昵称或中文名有关。','LEFT 是左航，Jeremy 是张极，SU 是苏新皓。']},
-      {title:'生日顺序不是密码',sub:'先按生日月份排序，再只读取 MBTI 最后一个字母。',hints:['不需要把完整生日全部输入。','生日只是决定读取 MBTI 的顺序。','01 → 02 → 04 → 05 → 11，然后读取 J / P。']},
-      {title:'四象限档案',sub:'重庆 / 非重庆 × INFP / 非 INFP。',hints:['先把五个人放进正确象限。','读取顺序是右上 → 右下 → 左下 → 左上。','左上两人按生日月份：左航在朱志鑫之前。']}
-    ],
-    2:[
-      {title:'五个角色',sub:'人物头像 → 角色名 → 家庭身份。',hints:['五个字不是姓名缩写。','它们来自五个人在团综里的家庭角色。','张极是“强”，张泽禹是“花”。']},
-      {title:'海南三天和谁住',sub:'不要记房号，只复原三天里真实发生过的室友组合。',hints:['每一天只勾选“真正同住过”的成员对。','第二天有两对同住，第三天也有两对。','第一天只有张极 + 张泽禹；第二天另有朱志鑫 + 左航。']},
-      {title:'不是房号，是关系',sub:'统计三天里每个人一共拥有过几个不同室友。',hints:['房间号码没有意义。','把三天放在一起，数“不同的人”。','“强”只有 1 个不同室友，“花”有 2 个。']}
-    ],
-    3:[
-      {title:'耳洞数量',sub:'把五个人的耳洞数填回个人柜。',hints:['这里只有一个人的数字明显很大。','左航不是 0。','朱志鑫 9、左航 2，其余三人 0。']},
-      {title:'家里还有兄弟姐妹吗',sub:'本机关有兄弟姐妹记 1，没有记 0。',hints:['只有两个人记 1。','两个人分别有姐姐和弟弟。','张极 1、苏新皓 1，其余 0。']},
-      {title:'谁先进入 26 键',sub:'先排序，再取英文名首字母在 QWERTY 的连续编号。',hints:['先别看键盘，先确定五个人应该按照什么顺序进入。','0 个耳洞的人继续用“手足”和生日月份排序。','顺序：朱志鑫、左航、苏新皓、张极、张泽禹。']}
-    ],
-    4:[
-      {title:'登登刻板印象',sub:'把五个人分进“领带 / 长裤”与“领结 / 短裤”。',hints:['这是第一张分类表。','左航、张极、朱志鑫在同一组。','张泽禹、苏新皓是领结 / 短裤。']},
-      {title:'体力和脑力',sub:'再完成第二张分类表。',hints:['不要拿第一张表替代第二张表。','体力组有三个人。','体力：朱志鑫、张极、苏新皓；脑力：张泽禹、左航。']},
-      {title:'把两张表叠起来',sub:'最后叠加星座，给 A-E 五个站位找到唯一成员。',hints:['两张分类表必须同时使用。','“领带 + 体力”会出现两个人，所以还没有结束。','用水瓶和天蝎区分张极与朱志鑫。']}
-    ],
-    5:[
-      {title:'登言登语',sub:'把五张语录放回对应成员。',hints:['先听语气和称呼。','五句话都来自同一批节目片段。','“鸡丝凉面”是朱志鑫，“摄影师”是左航。']},
-      {title:'五个“最”',sub:'把五张“最……”标签放回对应成员。',hints:['这批标签与语录是两套独立线索。','“最直的人”不是张极。','张极=最想收购 sdfj；左航=最直的人。']},
-      {title:'五个黑洞游戏',sub:'把五个游戏配回五个人。',hints:['答案顺序已经被打乱。','“憋笑挑战”和“不能做挑战”不是同一个人。','朱志鑫=憋笑挑战；苏新皓=不能做挑战。']},
-      {title:'三张卡必须属于同一个人',sub:'把语录、标签、黑洞游戏三层重新合并，再按规则取数字。',hints:['最后的数字不来自游戏名称。','黑洞游戏字数只负责决定成员读取顺序。','顺序是朱志鑫、苏新皓、张极、左航、张泽禹。']}
-    ],
-    6:[
-      {title:'26 跨年三种自创歌曲主题',sub:'把成员配进爱情、友情、亲情三种主题。',hints:['每种主题都有两个人。','苏新皓出现在两个主题中。','爱情=朱志鑫+苏新皓；友情=左航+苏新皓；亲情=张极+张泽禹。']},
-      {title:'五首舞台成员',sub:'给每首舞台选出三名成员。',hints:['每首都是三人舞台。','张极出现频率很高。','《千疮百孔》=朱志鑫/左航/苏新皓。']},
-      {title:'谁出现了几次',sub:'统计五首舞台里的成员出现次数。',hints:['这里得到的是中间表，不是最终密码。','总共 15 个“成员-舞台”位置。','朱志鑫 2，张泽禹 3，张极 4，左航 3，苏新皓 3。']},
-      {title:'不要直接抄计数表',sub:'五个数学符号问题先“选人”，再读取次数。',hints:['第三题算出的次数表还不是最终密码。','五个问题实际上是在“选人”。','每次先找到成员，再去读取那个人的出现次数。']}
-    ],
-    7:[
-      {title:'把五个人送回出发点',sub:'把五张人物卡拖到重庆、常州、哈尔滨。',hints:['只有三座出发城市。','重庆有三个人。','重庆：朱志鑫/左航/苏新皓；哈尔滨：张泽禹；常州：张极。']},
-      {title:'为什么常州被圈起来',sub:'比较三个游戏固定经度与 UTC+8 标准经线。',hints:['经纬度不是让你计算北京到家乡多少公里。','只看 E 前面的数字和 120 比较。','常州 119.97°E，几乎就是 120°E。']},
-      {title:'从不同方向来到同一个时间',sub:'西边=0，±0.1°=2，东边=1；按生日月份读取。',hints:['先把五个人按生日月份排好。','重庆在西、哈尔滨在东、常州几乎在 120 上。','顺序：苏新皓 → 张极 → 张泽禹 → 左航 → 朱志鑫。']}
-    ],
-    8:[
-      {title:'播放器筛选器',sub:'不要背曲序，只按四条标题结构规则筛选。',hints:['注意标题“长什么样”，不是只看内容。','两首纯中文候选是 07 与 09。','VS→03；纯中文短→07；CD Only→10；纯中文长→09。']},
-      {title:'四张卡不按曲序摆',sub:'把 03 / 07 / 10 / 09 放进“对抗 / 提问 / 仅实体介质 / 最长中文句子”。',hints:['卡槽名字就是筛选理由。','“仅实体介质”对应 CD Only。','正确排列是 03 - 07 - 10 - 09。']},
-      {title:'章节索引',sub:'把四个编号送入影片章节索引。',hints:['不需要重新排列十一首歌曲。','这里不是播放音乐。','输入 03 / 07 / 10 / 09。']}
-    ],
-    9:[
-      {title:'四个字先变成字母',sub:'润！闷。哈？哟～ → 四个英文字母。',hints:['不要读声调。','看四个字的拼音首字母。','R / M / H / Y。']},
-      {title:'26 键的位置',sub:'沿用第三局的 QWERTY 连续编号。',hints:['你已经知道他们习惯哪种键盘了。','不是九宫格。','R=04，M=26，H=16，Y=06。']},
-      {title:'四条 26 格控制条',sub:'！=取列，。=取行，？=行+列，～=列-行。',hints:['先把每个字母变成两位编号。','把两位编号看成“行/列”两部分做标点运算。','04→4，26→2，16→7，06→6。']}
-    ],
-    10:[
-      {title:'四个字的最后一位',sub:'不是任何一个人的名字，是五个人共同使用的名字。',hints:['不是成员名字。','四个字就是他们共同站在舞台上使用的名字。','登陆少年；计算四个字笔画，只取个位。']},
-      {title:'镜后 B 柜',sub:'先选对归档箱，再调用前面多局资料打开五位数锁。',hints:['这个标记有点眼熟，也许以前在哪里见过。','五个图标先变成五个人，数字来自第三局的两套资料。','顺序：张极→左航→苏新皓→张泽禹→朱志鑫；耳洞+手足。']},
-      {title:'母带',sub:'打开 B 箱，取得离线保存的最终母带。',hints:['真正的文件从来没有在网络上。','B 柜标签写的是 MASTER ARCHIVE。','取出 TOP_2ND_MASTER / FINAL CUT / DO NOT OVERWRITE。']}
-    ]
+const MEMBERS = {
+  zzx:{name:'朱志鑫',img:'assets/members/zzx.jpg',month:11,day:19,zodiac:'天蝎座',mbti:'INFP',ear:9,sibling:0,pet:0,game:'憋笑挑战'},
+  zzy:{name:'张泽禹',img:'assets/members/zzy.jpg',month:4,day:30,zodiac:'金牛座',mbti:'ESTJ',ear:0,sibling:0,pet:3,game:'认人游戏（漫威英雄）'},
+  zj:{name:'张极',img:'assets/members/zj.jpg',month:2,day:3,zodiac:'水瓶座',mbti:'INFP',ear:0,sibling:1,pet:1,game:'谁是卧底版恐怖箱'},
+  zh:{name:'左航',img:'assets/members/zh.jpg',month:5,day:22,zodiac:'双子座',mbti:'INFP',ear:2,sibling:0,pet:1,game:'蒙眼踢足球'},
+  sxh:{name:'苏新皓',img:'assets/members/sxh.jpg',month:1,day:12,zodiac:'摩羯座',mbti:'ENTJ',ear:0,sibling:1,pet:0,game:'不能做挑战'}
+};
+
+const QUOTES = {
+  sxh:'他们生三个，感情能不好嘛',
+  zh:'我只是一个摄影师，没有和过稀泥',
+  zzy:'小宝甜还是青提甜～',
+  zzx:'就是鸡丝凉面！没有错啊~',
+  zj:'哪有持续！拿过来呀～'
+};
+
+const MOST_Q = [
+  ['最想收购 sdfj 的人','zj'],
+  ['最没办法的人','zzx'],
+  ['最熟练掌握登员使用手册的人','zzy'],
+  ['最直的人','zh'],
+  ['变成女生想把他们一个个亲一遍的人','sxh']
+];
+
+const SONGS = [
+  'LOVE IS DANGEROUS!（危险的爱）','耶（Yeah）','我 VS JustinBieber','无所畏计划（Emergency）','For you（写给你）','痴人说梦（DayDream）','你能听到吗','命（FATE）','走在路上突然收到了快乐邀请','无所不能 TOP（CD Only）','Still Alive（背水一战）'
+];
+
+const TRIOS = {
+  '573':{members:['zzy','zj','zh'],desc:'三个人都在 57 中读过中学。',weight:15},
+  'OK3':{members:['zzx','zj','zh'],desc:'三个人都比过 OK 手势。',weight:3},
+  'C83':{members:['zzx','zj','sxh'],desc:'三个人一起去韩国训练。',weight:11},
+  '打瓦3':{members:['zzx','zzy','zh'],desc:'三个人都打瓦。',weight:3}
+};
+
+const FRAGMENTS = {
+  1:'五个人的个人资料其实一直都没有出错。',
+  2:'出问题的是一个从来不填写“姓名”的档案。',
+  3:'有人曾经在标题旁写过一句：“别把我们背成五张百科。”',
+  4:'系统第一次测试时，只允许录入“客观字段”。',
+  5:'生日、宠物、家庭、习惯，看起来什么都有。',
+  6:'但有人问了一句：“那我们之间的东西放哪儿？”',
+  7:'最早的联合档案测试，不允许直接输入姓名。',
+  8:'因为姓名只能证明“你是谁”。',
+  9:'而他们想测试的是：“什么东西一出现，你就会想到这个人？”',
+  10:'分房记录原本只是节目组的一张工作表。',
+  11:'后来有人把它改成了关系图。',
+  12:'同一个房间出现两次，在系统里就会形成更粗的一条线。',
+  13:'系统开始允许“同一个人拥有很多标签”。',
+  14:'体力、脑力、衣服、角色，没有任何一个标签能够单独定义一个人。',
+  15:'但几个标签交叉在一起，就会出现唯一答案。',
+  16:'第六份档案第一次出现了内容。',
+  17:'它没有记录“成员属性”。',
+  18:'它记录的是：A 和 B 之间发生过什么。',
+  19:'很多题最开始都来自综艺问卷和聊天记录。',
+  20:'有人觉得这些问题太怪了。',
+  21:'旁边却有人写：“怪一点才记得住。”',
+  22:'A 箱是旧版本档案备份。',
+  23:'2026 二周年的联合授权器已经转入 B 箱。',
+  24:'专辑资料不是舞台密码。它只是证明归档算法还能正确读取旧资料。',
+  25:'四个三人组来自四件完全不同的事情。',
+  26:'但系统只看到一个共同特点：“三个人之间确实存在一段共享经历。”',
+  27:'23:10　B 箱二周年联合授权器写入完成。存放位置：镜后档案架。',
+  28:'第六份档案从来没有“姓名”字段。',
+  29:'它只保存成员之间的连接。',
+  30:'五个人可以拥有五份档案。可“登陆少年”，只能存在于他们彼此之间。'
+};
+
+const SCENES = {
+  1:{title:'《五份档案》',sub:'三人组资料室 / 回忆资料角',bg:'assets/backgrounds/bg7.jpg',difficulty:'★★☆☆☆',puzzles:['生日顺序','星座 × MBTI 档案校验','“最……”问卷','档案差值']},
+  2:{title:'《9 · 2 · 0》',sub:'成员储物柜身份区',bg:'assets/backgrounds/bg3.jpg',difficulty:'★★★☆☆',puzzles:['耳洞','兄弟姐妹','现在家里的宠物','三字段身份值']},
+  3:{title:'《26 键》',sub:'后台化妆间 / 输入法测试区',bg:'assets/backgrounds/bg5.jpg',difficulty:'★★★☆☆',puzzles:['这是谁说的','“润闷哈哟”全新密码','“登陆少年”的 26 键坐标','两个口令的距离']},
+  4:{title:'《无所不能 TOP · 分房》',sub:'分房复盘室',bg:'assets/backgrounds/bg4.jpg',difficulty:'★★★★☆',puzzles:['还原三天房间','谁和谁真正住过一起','个人住宿统计','房间权重']},
+  5:{title:'《强 · 花 · 壮 · 香 · 锤》',sub:'角色卡与分类指挥区',bg:'assets/backgrounds/bg6.jpg',difficulty:'★★★★☆',puzzles:['角色笔画','角色差值','四个集合交叉定位','两组差值叠加']},
+  6:{title:'《三种关系》',sub:'舞蹈室 / 关系光谱实验区',bg:'assets/backgrounds/bg2.jpg',difficulty:'★★★★☆',puzzles:['歌曲关系归组','一个人可以出现几次','关系 × MBTI','日期尾数']},
+  7:{title:'《五个黑洞》',sub:'黑洞游戏复盘练习室',bg:'assets/backgrounds/bg1.jpg',difficulty:'★★★★☆',puzzles:['黑洞游戏对应','按照名字长度排序','“最……”身份复核','跨局字段']},
+  8:{title:'《无所畏惧》',sub:'专辑资料室',bg:'assets/backgrounds/bg8.jpg',difficulty:'★★★★★',puzzles:['恢复 11 首完整曲序','括号集合','“无所畏惧”不是总笔画','专辑校验串']},
+  9:{title:'《四个三人组》',sub:'联合数据控制室',bg:'assets/backgrounds/bg9.jpg',difficulty:'★★★★★',puzzles:['名称来源','四集合成员出现次数','给“组”加权','成员的组权重总和']},
+  10:{title:'《第六份档案》',sub:'第六档案入口 / 镜后档案架',bg:'assets/backgrounds/bg10.jpg',difficulty:'★★★★★+',puzzles:['六字段联合校验','A 还是 B','B 箱五槽密码','第六个人是谁']}
+};
+
+const HINTS = {
+  '1-1':['不要比较年份，也不用比较具体日期。','先看月份。','01 → 02 → 04 → 05 → 11。'],
+  '1-2':['先把每个人的星座和 MBTI 当成两个独立字段。','同一个人的两个字段必须同时正确。','朱志鑫对应天蝎座 / INFP；其余也逐一对应。'],
+  '1-3':['五张采访标签的顺序本身很重要。','先给五个问题找到人，再保留原问题顺序。','第一位是张极，第二位是朱志鑫。'],
+  '1-4':['不要再排人，利用上一题得到的成员顺序。','把五人的出生月份写成一排，再做相邻绝对差。','02 / 11 / 04 / 05 / 01。'],
+  '2-1':['不是所有人的数字都大于零。','注意柜门记录里只有两个人有非零数据。','朱志鑫是 9，左航是 2。'],
+  '2-2':['柜子里只有两张家庭提示卡。','有姐姐和有弟弟分别记为 1。','张极 1、苏新皓 1，其余为 0。'],
+  '2-3':['按固定成员顺序填写。','看前台宠物资料卡，不要和兄弟姐妹混在一起。','张泽禹是 3，张极和左航各 1。'],
+  '2-4':['三排数字不是三个密码。','每个人都要单独代入墙上的公式。','先算朱志鑫：9。'],
+  '3-1':['每句怪话都属于不同的人。','可以先从最有辨识度的两句开始排除。','“摄影师”对应左航，“拿过来呀”对应张极。'],
+  '3-2':['听语气没用，这次也不看声调。','把拼音首字母放进 26 键坐标，再按标点规则取值。','R 取列、M 取行、H 行列相加、Y 列减行。'],
+  '3-3':['仍然使用上一题的 26 键坐标。','D / L / S / N 分别计算行号 + 列号。','L 的结果 11 只保留个位。'],
+  '3-4':['最后一步不是加法。','比较两个四位数同一位置上的数字。','第一位是 |4-5| = 1。'],
+  '4-1':['先把三天分别还原，不要急着算公式。','第一天只有一对同住，第二天和第三天各有两对。','第一天张极和张泽禹同住。'],
+  '4-2':['把“同住”理解成两个人之间的一条线。','同一对连续出现两晚，权重就是 2。','张极↔张泽禹 2 晚，朱志鑫↔左航 2 晚。'],
+  '4-3':['分别统计“和别人住”与“自己住”。','每个人三天总数应该能核对到 3。','张泽禹同住 3 晚、单住 0 晚。'],
+  '4-4':['三天记录要先合并。','公式是（同住夜数 × 0.5 + 单住夜数）向上取整。','朱志鑫是 2×0.5+1。'],
+  '5-1':['这里只按墙上给出的统一笔画口径。','五张角色牌顺序固定为强、花、壮、香、锤。','强 12、花 7、壮 6、香 9、锤 13。'],
+  '5-2':['五个角色排成一队。','不看本身，看相邻之间差多少。','前两位差值分别是 5、1。'],
+  '5-3':['这是集合交叉，不是单一标签判断。','每个问题都把衣着组和体/脑力组相交，再看家庭条件。','A 是张极，B 是朱志鑫。'],
+  '5-4':['5134 不是最终密码。','另一组四位数来自五个人出生月份的相邻差。','先得到 9643，再和 5134 相加。'],
+  '6-1':['一个人可以被拖进不止一个关系。','苏新皓会出现在两个区域。','爱情：朱志鑫/苏新皓；友情：左航/苏新皓；亲情：张极/张泽禹。'],
+  '6-2':['统计每个人在三个关系里出现了几次。','只有一个人出现两次。','固定成员顺序下是 1 / 1 / 1 / 1 / 2。'],
+  '6-3':['需要回看第一局 MBTI。','把关系集合与 INFP / 非 INFP 做交叉。','爱情∩INFP 是朱志鑫；爱情∩非 INFP 是苏新皓。'],
+  '6-4':['顺序来自上一题。','不是月份，这次只看生日日期最后一位。','19、12、22、03、30。'],
+  '7-1':['五张海报分别属于不同成员。','从“蒙眼踢足球”“恐怖箱”等关键词判断。','左航是蒙眼踢足球，张极是谁是卧底版恐怖箱。'],
+  '7-2':['先按核心游戏名的汉字数量分组。','同长度时再用出生月份从早到晚排序。','4 字组先张泽禹后朱志鑫。'],
+  '7-3':['这是第一局“最……”问卷的复核。','可以直接打开“回看记录”查看第一局。','保持第一局五道问题的原顺序。'],
+  '7-4':['这次必须回看第二局档案。','不是第二局的加权公式，三项直接相加。','按照上一题/排序得到的成员顺序逐个计算。'],
+  '8-1':['先不要算任何数字，先把曲序恢复。','注意第 10 首是 CD Only，但依然属于完整曲目。','总共 11 首，01 到 11 都要排进去。'],
+  '8-2':['只看标题里有没有括号补充信息。','分别求“有括号”和“无括号”的序号和，再相减。','有括号序号和是 47，无括号序号和是 19。'],
+  '8-3':['不是求总笔画。','后一个字减去前一个字。','8-4、9-8、11-9。'],
+  '8-4':['10 和 11 都有用。','10 是 CD Only 的曲目编号。','三段是 412 / 18 / 11。'],
+  '9-1':['名称不是人名密码。','先确认每个三人组的三名成员和名称来源。','573 是张泽禹 / 张极 / 左航。'],
+  '9-2':['统计每个人出现于几个三人组。','同一个人可以在三个组里都出现。','朱志鑫 3 次，苏新皓 1 次。'],
+  '9-3':['不要把 573 拆成三个人。','先给四个“组”计算数字权重。','573 的权重是 15，C83 是 11。'],
+  '9-4':['先算五个人各自参与组的权重总和。','再按出生月份从早到晚重新排序，只取个位。','月份顺序是苏新皓、张极、张泽禹、左航、朱志鑫。'],
+  '10-1':['这次需要大量回看前面的记录。','六个字段分别来自第二、四、六、九局。','固定成员顺序是朱志鑫、张泽禹、张极、左航、苏新皓。'],
+  '10-2':['两个箱子外观不能区分。','回看第八、第九局的剧情碎片。','A 是旧版本，2026 二周年联合授权器转入 B。'],
+  '10-3':['需要第九局“组权重总和”和第一局生日月份。','五个人都做：生日月份 + 组权重总和。','朱志鑫是 11 + 17。'],
+  '10-4':['这不是数字题。','五个人已经各自拥有独立档案。','请填写这五个人共同的正式组合名称。']
+};
+
+const CLOCKS = {1:'22:36',2:'22:42',3:'22:49',4:'22:56',5:'23:03',6:'23:10',7:'23:18',8:'23:27',9:'23:39',10:'23:52'};
+
+function freshState(){
+  const solved={}; for(let s=1;s<=10;s++) solved[s]=[false,false,false,false];
+  return {
+    version:1,currentScene:1,unlockedScene:1,solved,sceneComplete:{},fragments:[],records:{},cluesSeen:{},
+    mirrorOpen:false,finalBoxSelected:null,archiveKeyObtained:false,stageUnlocked:false,normalEnding:false,completeEnding:false,
+    bgmOn:true,bgmVolume:.24,easter:{keyboard:0,trio:0},compatNoticeSeen:false
   };
+}
 
-  const subtitles = {
-    1:['这不是系统故障，锁是今晚 23:00 自己上的。','五份档案被故意拆散，因为他们不想让一道题只靠一张脸解决。','有人在测试记录里写：如果连顺序都记不住，就先别播最后一版。'],
-    2:['最早的一版题库里，强花壮香锤占了整整一页。','分房记录最后没有拿来考房号。','旁边写着四个字：记关系，不记门牌。'],
-    3:['后来他们开始把特别小的个人细节塞进题库。','耳洞、手足、英文名，任何一个单独拿出来都不像密码。','测试稿旁边被人用红笔写了一句：我们五个都用 26 键。'],
-    4:['妆造表原本只是工作人员随手记的。','“领带 / 领结”和“体力 / 脑力”本来毫无关系。','两张表叠起来以后，他们忽然发现：每个人都能变成一个坐标。'],
-    5:['他们把最离谱的话和最离谱的游戏放进了同一页。','有人说：一句话不能代表一个人，至少三条线索都对上再算。','所以最终版才有了语录、标签、黑洞游戏三层卡片。'],
-    6:['跨年舞台表被抄了很多遍，最后真的变成了一张矩阵。','出现次数不是排名，也不是成绩。','母带最后一帧旁边有个备注：这一帧必须 00:00 再播。'],
-    7:['地图上只有三座出发城市，却有五条线。','有人把常州旁边的 120°E 圈起来，写了句：这个梗可以。','五条箭头最后没有停在公司，而是全部指向同一个舞台。'],
-    8:['最初版本真的准备让玩家重新排十一首歌。','后来那一整页被划掉，旁边改成：别背整张表，学会筛。','最后留下的四个编号，被写进了影片章节索引。'],
-    9:['控制室最终版删掉了声调机关，改成了真正的 26 键位置。','系统日志第一次写出了实体位置：镜后 / B 柜 / MASTER。','所以影片从来没有丢失，它只是进入了离线保护。'],
-    10:['离线保护是他们自己要求的，因为最终彩排前谁都不能再覆盖母带。','23:00 自动启动的记忆校验，本来只是二周年前夜的一个内部彩蛋。','第五个人之外，总要有人记得，我们为什么会把这些东西当成答案。']
-  };
+let state = loadState();
+let currentPuzzle = null;
+let currentHintLevel = 0;
+let currentSongOrder = null;
 
-  const archive = {
-    1:{title:'五份档案',items:['英文名对应关系','生日月份读取顺序：苏新皓 → 张极 → 张泽禹 → 左航 → 朱志鑫','MBTI 的 J / P 读取规则','家乡：重庆 / 常州 / 哈尔滨']},
-    2:{title:'强花壮香锤',items:['强=张极=爸爸；花=张泽禹=妈妈；壮=朱志鑫=哥哥；香=苏新皓=妹妹；锤=左航=团宠','三天室友关系','每个人拥有过的不同室友数量可由三天关系重新统计']},
-    3:{title:'个人档案柜',items:['耳洞：朱志鑫 9、左航 2、张泽禹 0、张极 0、苏新皓 0','手足：张极 1、苏新皓 1，其余记 0','已确认成员读取顺序：朱志鑫 → 左航 → 苏新皓 → 张极 → 张泽禹','QWERTY 26 键连续编号规则']},
-    4:{title:'双标签站位',items:['领带/长裤：左航、张极、朱志鑫；领结/短裤：张泽禹、苏新皓','体力：朱志鑫、张极、苏新皓；脑力：张泽禹、左航','两层分类无法唯一时需要叠加星座']},
-    5:{title:'综合复盘',items:['语录、最……标签、黑洞游戏必须三条线索同时对上','最直的人=左航；没办法=朱志鑫','黑洞游戏读取顺序：朱志鑫 → 苏新皓 → 张极 → 左航 → 张泽禹']},
-    6:{title:'五首舞台',items:['爱情=朱志鑫+苏新皓；友情=左航+苏新皓；亲情=张极+张泽禹','舞台出现次数：朱志鑫 2、张泽禹 3、张极 4、左航 3、苏新皓 3','最终读取必须先按条件选人，再读取次数']},
-    7:{title:'城市路线',items:['家乡：重庆=朱志鑫/左航/苏新皓；哈尔滨=张泽禹；常州=张极','游戏固定经度：重庆 106.55°E / 常州 119.97°E / 哈尔滨 126.63°E','UTC+8 标准经线：120°E']},
-    8:{title:'专辑筛选',items:['标题筛选关键词：VS / 纯中文短标题 / CD Only / 纯中文长标题','四张章节卡：03、07、10、09','章节卡按“筛选理由”摆放，不按曲序重排整张专辑']},
-    9:{title:'语音与 26 键',items:['润/闷/哈/哟 → R/M/H/Y','26 键编号：R=04，M=26，H=16，Y=06','系统定位已确认：镜后 / B 柜 / MASTER']},
-    10:{title:'最终归档',items:['共同名字：登陆少年','B 柜是 MASTER ARCHIVE；A 柜是 REHEARSAL CACHE','最终五个图标需要调用角色、标签、基础资料和第三局个人数字']}
-  };
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return freshState();
+    const parsed=JSON.parse(raw), base=freshState();
+    const merged={...base,...parsed};
+    merged.solved={...base.solved,...(parsed.solved||{})};
+    for(let s=1;s<=10;s++) merged.solved[s]=Array.isArray(merged.solved[s])?merged.solved[s].slice(0,4):[false,false,false,false];
+    merged.sceneComplete={...base.sceneComplete,...(parsed.sceneComplete||{})};
+    merged.records={...base.records,...(parsed.records||{})};
+    merged.cluesSeen={...base.cluesSeen,...(parsed.cluesSeen||{})};
+    merged.easter={...base.easter,...(parsed.easter||{})};
+    return merged;
+  }catch(e){ return freshState(); }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); updateHud(); }
+function hasSave(){ return !!localStorage.getItem(STORAGE_KEY); }
+function resetState(){ localStorage.removeItem(STORAGE_KEY); state=freshState(); saveState(); location.reload(); }
 
-  // Percent-based hitboxes aligned to the user-provided scene images.
-  const hotspots = {
-    1:[
-      {kind:'puzzle',p:0,x:25,y:20,w:39,h:38,label:'五份成员档案墙'},
-      {kind:'puzzle',p:1,x:63,y:20,w:16,h:35,label:'逻辑校验板'},
-      {kind:'puzzle',p:2,x:82,y:17,w:14,h:42,label:'四象限板'},
-      {kind:'env',x:4,y:18,w:14,h:53,label:'TOP 重头列表',text:'左侧板记录着“记忆校验”的旧版本条目，部分内容已经被划掉。'},
-      {kind:'sub',i:0,x:19,y:11,w:5,h:7,label:'墙边照片'},
-      {kind:'sub',i:1,x:72,y:71,w:6,h:8,label:'桌面归档袋'},
-      {kind:'sub',i:2,x:90,y:63,w:5,h:7,label:'右侧文件夹'}
-    ],
-    2:[
-      {kind:'puzzle',p:0,x:2,y:5,w:30,h:72,label:'冰箱角色磁贴'},
-      {kind:'puzzle',p:1,x:76,y:24,w:22,h:55,label:'三天房间分配表'},
-      {kind:'puzzle',p:2,x:44,y:64,w:29,h:24,label:'岛台角色牌'},
-      {kind:'env',x:34,y:2,w:25,h:48,label:'零食补给站',text:'补给架上的零食并不是密码，但每一层都被整理得很认真。'},
-      {kind:'sub',i:0,x:5,y:50,w:7,h:8,label:'冰箱便签'},
-      {kind:'sub',i:1,x:61,y:26,w:6,h:9,label:'墙面小黑板'},
-      {kind:'sub',i:2,x:92,y:13,w:5,h:10,label:'分房板顶端'}
-    ],
-    3:[
-      {kind:'puzzle',p:0,x:11,y:4,w:29,h:73,label:'成员柜耳饰区'},
-      {kind:'puzzle',p:1,x:40,y:4,w:21,h:74,label:'成员柜家庭卡'},
-      {kind:'puzzle',p:2,x:68,y:69,w:28,h:25,label:'桌面五位锁'},
-      {kind:'env',x:76,y:6,w:19,h:38,label:'公告板',text:'公告板上是一些零散的证件复印件和宠物资料，和主机关没有直接关系。'},
-      {kind:'sub',i:0,x:15,y:9,w:5,h:9,label:'柜门照片'},
-      {kind:'sub',i:1,x:51,y:53,w:5,h:8,label:'黄色便签'},
-      {kind:'sub',i:2,x:89,y:70,w:6,h:10,label:'桌面资料架'}
-    ],
-    4:[
-      {kind:'puzzle',p:0,x:12,y:29,w:22,h:27,label:'领带 / 长裤板'},
-      {kind:'puzzle',p:1,x:74,y:16,w:16,h:42,label:'体力 / 脑力板'},
-      {kind:'puzzle',p:2,x:5,y:76,w:68,h:18,label:'A-E 地面站位'},
-      {kind:'env',x:37,y:35,w:28,h:35,label:'中央线索区',text:'中央板只写了规则：两张表叠起来仍不够时，还要找第三层属性。'},
-      {kind:'sub',i:0,x:20,y:31,w:4,h:7,label:'左侧表格角落'},
-      {kind:'sub',i:1,x:58,y:42,w:4,h:7,label:'镜面反光'},
-      {kind:'sub',i:2,x:83,y:61,w:6,h:10,label:'星象线索板'}
-    ],
-    5:[
-      {kind:'puzzle',p:0,x:0,y:4,w:29,h:64,label:'化妆间语录墙'},
-      {kind:'puzzle',p:1,x:80,y:22,w:19,h:46,label:'“最……”标签区'},
-      {kind:'puzzle',p:2,x:58,y:43,w:16,h:33,label:'化妆台黑洞游戏资料'},
-      {kind:'puzzle',p:3,x:14,y:70,w:56,h:26,label:'复盘桌'},
-      {kind:'env',x:31,y:5,w:26,h:69,label:'SNACK TIME',text:'零食架今天也亮着灯。有人留下了一张“小宝饿”的便签。'},
-      {kind:'sub',i:0,x:7,y:7,w:6,h:10,label:'左上便利贴'},
-      {kind:'sub',i:1,x:68,y:31,w:5,h:9,label:'镜边照片'},
-      {kind:'sub',i:2,x:22,y:79,w:7,h:8,label:'桌面场记牌'}
-    ],
-    6:[
-      {kind:'puzzle',p:0,x:28,y:26,w:43,h:31,label:'自创歌曲主题规划'},
-      {kind:'puzzle',p:1,x:14,y:15,w:13,h:40,label:'舞台演出歌曲列表'},
-      {kind:'puzzle',p:2,x:72,y:15,w:25,h:34,label:'成员出演统计表'},
-      {kind:'puzzle',p:3,x:24,y:58,w:56,h:36,label:'桌面五人档案与统计'},
-      {kind:'env',x:74,y:50,w:23,h:12,label:'TF FAMILY 展示柜',text:'右侧展示柜里还有六张小照片，但它们只是留存的舞台资料。'},
-      {kind:'sub',i:0,x:17,y:57,w:5,h:7,label:'台灯旁档案'},
-      {kind:'sub',i:1,x:84,y:52,w:5,h:7,label:'展示柜小卡'},
-      {kind:'sub',i:2,x:87,y:79,w:6,h:8,label:'右侧文件夹'}
-    ],
-    7:[
-      {kind:'puzzle',p:0,x:0,y:8,w:29,h:53,label:'城市路线图'},
-      {kind:'puzzle',p:1,x:29,y:11,w:10,h:36,label:'经度坐标卡'},
-      {kind:'puzzle',p:2,x:1,y:48,w:38,h:31,label:'桌面终端'},
-      {kind:'env',x:39,y:19,w:57,h:59,label:'练习室空场',text:'整间练习室被留空了，五条路线最终都指向同一片舞台方向。'},
-      {kind:'sub',i:0,x:3,y:37,w:6,h:8,label:'地图照片'},
-      {kind:'sub',i:1,x:31,y:50,w:6,h:7,label:'120°E 卡片'},
-      {kind:'sub',i:2,x:91,y:45,w:4,h:8,label:'镜面边缘'}
-    ],
-    8:[
-      {kind:'puzzle',p:0,x:26,y:16,w:34,h:39,label:'《无所畏惧》资料板'},
-      {kind:'puzzle',p:1,x:60,y:13,w:14,h:40,label:'筛选线索区'},
-      {kind:'puzzle',p:2,x:52,y:59,w:38,h:29,label:'资料筛选控制台'},
-      {kind:'env',x:0,y:32,w:26,h:51,label:'钢琴与谱架',text:'谱架上的专辑资料只强调“别背曲序”，重点是标题结构。'},
-      {kind:'sub',i:0,x:28,y:69,w:5,h:8,label:'谱架提示册'},
-      {kind:'sub',i:1,x:77,y:34,w:5,h:8,label:'11 号展示牌'},
-      {kind:'sub',i:2,x:90,y:69,w:6,h:8,label:'桌面透明卡'}
-    ],
-    9:[
-      {kind:'puzzle',p:0,x:20,y:10,w:33,h:22,label:'语音线索区'},
-      {kind:'puzzle',p:1,x:54,y:4,w:33,h:27,label:'26 键定位控制区'},
-      {kind:'puzzle',p:2,x:23,y:51,w:52,h:42,label:'主控制台与运算区'},
-      {kind:'env',x:75,y:37,w:20,h:27,label:'语音录制与播放区',text:'设备提示：点击线索卡播放语音，录制期间请保持安静。'},
-      {kind:'sub',i:0,x:3,y:1,w:14,h:31,label:'今日舞台任务'},
-      {kind:'sub',i:1,x:71,y:75,w:6,h:11,label:'线索记录本'},
-      {kind:'sub',i:2,x:91,y:58,w:6,h:13,label:'录制按钮'}
-    ],
-    10:[
-      {kind:'puzzle',p:0,x:71,y:4,w:19,h:45,label:'二周年照片墙与镜面'},
-      {kind:'puzzle',p:1,x:88,y:11,w:11,h:27,label:'隐藏归档区域入口'},
-      {kind:'puzzle',p:2,x:80,y:43,w:19,h:28,label:'最终取带区'},
-      {kind:'env',x:2,y:12,w:67,h:66,label:'镜前练习室',text:'这里看起来和平常的练习室没什么不同，只是二周年灯牌一直亮着。'},
-      {kind:'sub',i:0,x:78,y:29,w:5,h:8,label:'照片墙角落'},
-      {kind:'sub',i:1,x:91,y:23,w:4,h:8,label:'问号箱'},
-      {kind:'sub',i:2,x:78,y:76,w:7,h:9,label:'WE ARE FAMILY 灯牌'}
-    ]
-  };
+function escapeHtml(v){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function norm(v){ return String(v??'').trim().replace(/[\s\-_/|，,。·]/g,'').toLowerCase(); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function sameSet(a,b){ return a.length===b.length && [...a].sort().join('|')===[...b].sort().join('|'); }
+function memberName(id){ return MEMBERS[id]?.name||id; }
+function memberOptions(selected=''){ return `<option value="">选择成员</option>`+MEMBER_ORDER.map(id=>`<option value="${id}" ${selected===id?'selected':''}>${MEMBERS[id].name}</option>`).join(''); }
+function simpleOptions(items){ return `<option value="">请选择</option>`+items.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(''); }
+function memberGrid(ids=MEMBER_ORDER){ return `<div class="grid five">${ids.map(id=>`<button type="button" class="memberCard" data-member="${id}"><img src="${MEMBERS[id].img}" alt="${MEMBERS[id].name}"><b>${MEMBERS[id].name}</b></button>`).join('')}</div>`; }
+function status(el,msg,good=false){ if(!el)return; el.textContent=msg; el.className='answerStatus '+(good?'good':'bad'); }
+function toast(msg,type=''){ const t=document.createElement('div'); t.className='toast '+type; t.innerHTML=msg; $('#toastHost').appendChild(t); setTimeout(()=>t.remove(),3400); }
+function recordKey(scene,p){ return `${scene}-${p}`; }
+function solvedCount(){ return Object.values(state.solved).reduce((n,a)=>n+a.filter(Boolean).length,0); }
+function fragmentCount(){ return state.fragments.length; }
+function sceneSolved(scene){ return state.solved[scene].every(Boolean); }
+function archivePercent(){ if(state.stageUnlocked)return 100; const c=Object.keys(state.sceneComplete).filter(k=>Number(k)<=9&&state.sceneComplete[k]).length; return Math.min(96,Math.round(c*96/9)); }
 
-  const stageText = {
-    ordinary:[
-      '2026.08.29',
-      'TOP 登陆少年 · 2ND ANNIVERSARY',
-      'MASTER RESTORED',
-      '原来没有人删掉影片。最终母带为了避免彩排时被覆盖，被提前放进了离线归档柜。',
-      '五个人原本只想做一个二周年前夜的小测试，却因为自动校验提前启动，真的把所有人困在了他们准备好的十个问题里。',
-      '好在，你们还记得。',
-      '普通结局《零点之前》'
-    ],
-    director:[
-      '九年前，他们从三个不同的城市出发。重庆。哈尔滨。常州。',
-      '后来五条不同的线，全都落在了同一个地方。',
-      '有人慢慢有了九个耳洞。有人家里有姐姐。有人家里有弟弟。',
-      '有的人穿领带，有的人穿领结；有人被归进体力组，有人被归进脑力组。',
-      '他们在节目里变成过爸爸、妈妈、哥哥、妹妹和团宠。三天里换过房间，和不同的人做过室友。',
-      '他们说过后来回头看自己都觉得莫名其妙的话，玩过憋笑、认过漫威英雄、摸过恐怖箱、蒙着眼睛踢过足球，也试过什么都不能做。',
-      '他们写爱情，写友情，写亲情，又一次次在不同的舞台重新组合。',
-      '第一张专辑有自己的编号，每一场表演也有自己的坐标。',
-      '单独拿出来的时候，这些东西其实没有任何一个像是“重要事件”。它们不是冠军，不是奖杯，甚至不是一定值得写进年表里的东西。',
-      '可两年以后再回头，最先被记住的，偏偏可能就是这些。',
-      '所以他们没有把二周年校验做成“请说出我们的正确答案”，而是“你还记得为什么这个答案会属于我们吗？”',
-      '五个人之外，这场校验从一开始还留着第六个位置。那个位置没有姓名，没有生日，也没有成员编号。',
-      '它只属于：还记得这些事情的人。',
-      '2026.08.29 00:00',
-      'TOP 登陆少年 · 二周年快乐',
-      '答案会忘，坐标不会。'
-    ]
-  };
+const sceneBg=$('#sceneBg'), hotspots=$('#hotspots'), modalOverlay=$('#modalOverlay'), modal=$('#modal'), modalBody=$('#modalBody');
 
-  return {members, scenes, puzzleMeta, subtitles, archive, hotspots, stageText};
-})();
+function updateHud(){
+  const s=state.currentScene, sc=SCENES[s];
+  $('#sceneNo').textContent=`SCENE ${String(s).padStart(2,'0')}`;
+  $('#sceneTitle').textContent=sc.title;
+  $('#sceneSub').textContent=(s===10&&state.mirrorOpen?'镜后档案储藏区':sc.sub);
+  $('#clockTime').textContent=CLOCKS[s]||'22:36';
+  $('#clockDate').textContent='2026.08.28';
+  $('#puzzleCount').textContent=`${solvedCount()} / 40`;
+  $('#fragmentCount').textContent=`${fragmentCount()} / 30`;
+  $('#archivePercent').textContent=`${archivePercent()}%`;
+  $('#bgmState').textContent=state.bgmOn&&!$('#bgmAudio').paused?'播放中':'已暂停';
+  $('#bgmBtn').classList.toggle('on',state.bgmOn&&!$('#bgmAudio').paused);
+}
+
+function setModal(title,desc,html,size='normal',opts={}){
+  $('#modalEyebrow').textContent=opts.eyebrow||'';
+  $('#modalTitle').textContent=title;
+  $('#modalDesc').textContent=desc||'';
+  modalBody.innerHTML=html||'';
+  modal.className=size==='small'?'small':size==='wide'?'wide':size==='xwide'?'xwide':'';
+  modalOverlay.classList.remove('hidden'); modalOverlay.setAttribute('aria-hidden','false');
+  $('#modalHint').classList.toggle('hidden',!opts.hints);
+  $('#modalReview').classList.toggle('hidden',opts.review===false);
+  currentHintLevel=0;
+  if(opts.hints){ currentPuzzle={scene:opts.scene,puzzle:opts.puzzle}; } else if(!opts.keepPuzzle){ currentPuzzle=null; }
+}
+function closeModal(){ modalOverlay.classList.add('hidden'); modalOverlay.setAttribute('aria-hidden','true'); currentPuzzle=null; }
+$('#closeModal').addEventListener('click',closeModal);
+modalOverlay.addEventListener('click',e=>{ if(e.target===modalOverlay) closeModal(); });
+$('#modalHint').addEventListener('click',()=>{
+  if(!currentPuzzle)return;
+  const key=recordKey(currentPuzzle.scene,currentPuzzle.puzzle), arr=HINTS[key]||[];
+  if(!arr.length)return toast('这个机关没有额外提示。','info');
+  const i=Math.min(currentHintLevel,arr.length-1); currentHintLevel=Math.min(currentHintLevel+1,arr.length);
+  toast(`<b>提示 ${i+1}/3</b><br>${escapeHtml(arr[i])}`,'info');
+});
+$('#modalReview').addEventListener('click',()=>openReview(currentPuzzle?{...currentPuzzle}:null));
+
+function solve(scene,p,result,detail){
+  state.solved[scene][p-1]=true;
+  state.records[recordKey(scene,p)]={scene,p,title:SCENES[scene].puzzles[p-1],result,detail};
+  if(sceneSolved(scene)){
+    state.sceneComplete[scene]=true;
+    if(scene<10) state.unlockedScene=Math.max(state.unlockedScene,scene+1);
+    if(scene===10) state.stageUnlocked=true;
+  }
+  saveState();
+  toast('联合校验记录已更新。','good');
+}
+function canOpenPuzzle(scene,p){ return p===1 || state.solved[scene][p-2]; }
+function openPuzzleHub(scene=state.currentScene){
+  const sc=SCENES[scene];
+  const tiles=sc.puzzles.map((title,i)=>{
+    const p=i+1, done=state.solved[scene][i], open=canOpenPuzzle(scene,p);
+    return `<button class="puzzleTile ${done?'solved':''} ${!open?'locked':''}" data-p="${p}" ${!open?'disabled':''}>
+      <span class="num">PUZZLE ${String(p).padStart(2,'0')}</span><h3>${escapeHtml(title)}</h3>
+      <p>${done?'可以重新打开复盘；结果已写入回看记录。':open?'机关已解锁，点击开始。':'完成上一题后解锁。'}</p>
+      <span class="statusPill ${done?'solved':''}">${done?'已解决':open?'待校验':'锁定'}</span></button>`;
+  }).join('');
+  const next = scene<10 && state.sceneComplete[scene] ? `<div class="divider"></div><button id="nextSceneBtn" class="primary">进入下一局</button>` : '';
+  setModal(`${sc.title} · 解谜终端`,`${sc.difficulty} · 每一道已经解开的谜题都可以随时回看。`,`<div class="puzzleHub">${tiles}</div>${next}`,'wide',{review:true});
+  $$('.puzzleTile',modalBody).forEach(b=>b.addEventListener('click',()=>openPuzzle(scene,Number(b.dataset.p))));
+  if($('#nextSceneBtn')) $('#nextSceneBtn').onclick=()=>goScene(scene+1);
+}
+
+function openReview(returnTo=null){
+  const sections=[];
+  for(let s=1;s<=state.unlockedScene;s++){
+    const recs=[];
+    for(let p=1;p<=4;p++){
+      const r=state.records[recordKey(s,p)];
+      if(r) recs.push(`<div class="recordItem"><div class="recordNo">${s}.${p}</div><div><b>${escapeHtml(r.title)}</b><p>${escapeHtml(r.detail||'')}</p><p>记录结果：<span class="recordValue">${escapeHtml(r.result||'—')}</span></p></div></div>`);
+      else recs.push(`<div class="recordItem"><div class="recordNo">${s}.${p}</div><div><b>${escapeHtml(SCENES[s].puzzles[p-1])}</b><p class="muted">${canOpenPuzzle(s,p)?'尚未解决。':'尚未解锁。'}</p></div></div>`);
+    }
+    sections.push(`<section class="recordScene"><h3>第 ${s} 局 · ${escapeHtml(SCENES[s].title)}</h3>${recs.join('')}</section>`);
+  }
+  const back=returnTo?`<div class="divider"></div><button id="returnPuzzle" class="primary">返回刚才的谜题</button>`:'';
+  setModal('回看记录','所有已经解开的中间结果都会保存在这里。跨局题不用靠记忆硬背。',sections.join('')+back,'wide',{review:false});
+  if(returnTo && $('#returnPuzzle')) $('#returnPuzzle').onclick=()=>openPuzzle(returnTo.scene,returnTo.puzzle);
+}
+
+function openArchive(){
+  const sections=[];
+  for(let s=1;s<=10;s++){
+    if(s>state.unlockedScene && s!==10) break;
+    const nums=[s*3-2,s*3-1,s*3];
+    const dots=nums.map(n=>`<span class="${state.fragments.includes(n)?'got':''}">${state.fragments.includes(n)?'●':'○'}</span>`).join(' ');
+    const texts=nums.map(n=>state.fragments.includes(n)?`<div class="fragmentText"><b>碎片 ${String(n).padStart(2,'0')}</b><br>${escapeHtml(FRAGMENTS[n])}</div>`:`<div class="fragmentText muted">尚未找到</div>`).join('');
+    sections.push(`<section class="fragmentScene"><div class="fragmentSceneHead"><b>第 ${s} 局</b><span class="fragmentDots">${dots}</span></div>${texts}</section>`);
+  }
+  const footer = state.fragments.length===30 ? `<div class="puzzleIntro"><strong>30 / 30</strong>　完整二周年纪念记录已具备恢复条件。</div>` : `<div class="puzzleIntro">已找到 <strong>${state.fragments.length} / 30</strong>。未找到的碎片只显示为空位，不剧透内容。</div>`;
+  setModal('联合档案','剧情碎片不影响基础通关；前九局通关后仍可返回补收集。',footer+sections.join(''),'wide',{review:true});
+}
+
+function openMap(){
+  const items=[];
+  for(let s=1;s<=10;s++){
+    const locked=s>state.unlockedScene, current=s===state.currentScene;
+    items.push(`<button class="mapScene ${locked?'locked':''} ${current?'current':''}" data-scene="${s}" ${locked?'disabled':''}><b>第 ${s} 局 · ${escapeHtml(SCENES[s].title)}</b><span>${escapeHtml(SCENES[s].sub)} · ${state.sceneComplete[s]?'已完成':'进行中'}</span></button>`);
+  }
+  setModal('场景地图','已解锁场景可以任意返回。回到旧场景不会清空当前进度。',`<div class="mapGrid">${items.join('')}</div>`,'wide',{review:true});
+  $$('.mapScene',modalBody).forEach(b=>b.addEventListener('click',()=>goScene(Number(b.dataset.scene))));
+}
+
+function goScene(scene){
+  if(scene<1||scene>state.unlockedScene)return;
+  state.currentScene=scene; saveState(); closeModal(); renderScene();
+}
+
+function collectFragment(n){
+  if(state.fragments.includes(n)) return toast('这里已经看过了。','info');
+  state.fragments.push(n); state.fragments.sort((a,b)=>a-b); saveState();
+  toast(`<b>获得剧情碎片 ${String(n).padStart(2,'0')}</b><br>${escapeHtml(FRAGMENTS[n])}`,'good');
+  renderScene();
+}
+
+function addHotspot({x,y,w,h,tip,action,cls='',fragment=null,disabled=false}){
+  const b=document.createElement('button'); b.type='button'; b.className=`hotspot ${cls} ${disabled?'locked':''}`; b.dataset.tip=tip||'';
+  Object.assign(b.style,{left:`${x}%`,top:`${y}%`,width:`${w}%`,height:`${h}%`});
+  if(fragment){ b.classList.add('fragment',state.fragments.includes(fragment)?'found':'available'); }
+  if(!disabled) b.addEventListener('click',()=>{ b.classList.add('touching'); setTimeout(()=>b.classList.remove('touching'),180); if(fragment && !state.fragments.includes(fragment)) collectFragment(fragment); if(action) action(); });
+  hotspots.appendChild(b);
+}
+
+const CLUE_HTML = {
+  s1profiles:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><div class="memberMini"><img src="${MEMBERS[id].img}"><b>${MEMBERS[id].name}</b></div><p>生日：${pad2(MEMBERS[id].month)} 月 ${pad2(MEMBERS[id].day)} 日</p><p>星座：${MEMBERS[id].zodiac}</p><p>MBTI：${MEMBERS[id].mbti}</p></div>`).join('')}</div>`,
+  s1interview:`<div class="grid two"><div class="card"><h3>采访索引 A</h3><p>“最想收购 sdfj”——张极</p><p>“最没办法”——朱志鑫</p></div><div class="card"><h3>采访索引 B</h3><p>“使用手册”——张泽禹</p><p>“最直”——左航</p><p>“变成女生想……”——苏新皓</p></div></div>`,
+  s2ears:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><p>耳洞记录：<strong class="gold">${MEMBERS[id].ear}</strong></p></div>`).join('')}</div>`,
+  s2family:`<div class="grid two"><div class="card"><h3>家庭提示卡 01</h3><p>张极：一位姐姐。</p></div><div class="card"><h3>家庭提示卡 02</h3><p>苏新皓：一位弟弟。</p></div></div><p class="tiny">其余三份家庭字段为空。</p>`,
+  s2pets:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><p>当前家里宠物：<strong class="gold">${MEMBERS[id].pet}</strong></p></div>`).join('')}</div>`,
+  s3quotes:`<div class="grid two">${Object.entries(QUOTES).map(([id,q])=>`<div class="card"><h3>${MEMBERS[id].name}</h3><p>“${escapeHtml(q)}”</p></div>`).join('')}</div>`,
+  s3keyboard:`<div class="puzzleIntro">26 键坐标图：每一行单独从左向右计列。</div>${keyboardHtml()}`,
+  s3punct:`<div class="grid four"><div class="card"><h3>！</h3><p>取列</p></div><div class="card"><h3>。</h3><p>取行</p></div><div class="card"><h3>？</h3><p>行 + 列</p></div><div class="card"><h3>～</h3><p>列 - 行</p></div></div>`,
+  s4day1:`<div class="card"><h3>第一天</h3><p>张极 + 张泽禹一间。朱志鑫单独。左航单独。苏新皓单独。</p></div>`,
+  s4day2:`<div class="card"><h3>第二天</h3><p>朱志鑫 + 左航。张泽禹 + 张极。苏新皓单独。</p></div>`,
+  s4day3:`<div class="card"><h3>第三天</h3><p>朱志鑫 + 左航。张泽禹 + 苏新皓。张极单独。</p></div>`,
+  s4formula:`<div class="puzzleIntro"><strong>房间权重</strong> = （同住夜数 × 0.5 + 单住夜数）向上取整</div>`,
+  s5stroke:`<div class="grid five"><div class="card"><h3>强</h3><p>12</p></div><div class="card"><h3>花</h3><p>7</p></div><div class="card"><h3>壮</h3><p>6</p></div><div class="card"><h3>香</h3><p>9</p></div><div class="card"><h3>锤</h3><p>13</p></div></div>`,
+  s5groups:`<div class="grid two"><div class="card"><h3>领带 / 长裤组</h3><p>左航、张极、朱志鑫</p></div><div class="card"><h3>领结 / 短裤组</h3><p>张泽禹、苏新皓</p></div><div class="card"><h3>体力组</h3><p>朱志鑫、张极、苏新皓</p></div><div class="card"><h3>脑力组</h3><p>张泽禹、左航</p></div></div>`,
+  s6relations:`<div class="grid three"><div class="card"><h3>爱情</h3><p>朱志鑫、苏新皓</p></div><div class="card"><h3>友情</h3><p>左航、苏新皓</p></div><div class="card"><h3>亲情</h3><p>张极、张泽禹</p></div></div>`,
+  s7games:`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><div class="memberMini"><img src="${MEMBERS[id].img}"><b>${MEMBERS[id].name}</b></div><p>${escapeHtml(MEMBERS[id].game)}</p></div>`).join('')}</div>`,
+  s8songs:`<div class="inputCol">${SONGS.map((s,i)=>`<div class="card"><b>${String(i+1).padStart(2,'0')}.</b> ${escapeHtml(s)}</div>`).join('')}</div>`,
+  s8stroke:`<div class="grid four"><div class="card"><h3>无</h3><p>4</p></div><div class="card"><h3>所</h3><p>8</p></div><div class="card"><h3>畏</h3><p>9</p></div><div class="card"><h3>惧</h3><p>11</p></div></div>`,
+  s9trios:`<div class="grid two">${Object.entries(TRIOS).map(([name,t])=>`<div class="card"><h3>${name}</h3><p>${t.members.map(memberName).join(' / ')}</p><p>${escapeHtml(t.desc)}</p></div>`).join('')}</div>`,
+  s10device:`<div class="grid two"><div class="card"><h3>A 箱</h3><p>设备标签残缺，外观无法判断版本。</p></div><div class="card"><h3>B 箱</h3><p>设备标签残缺，外观无法判断版本。</p></div></div><p class="tiny">真正版本信息需要回看前面获得的记录与剧情碎片。</p>`
+};
+function keyboardHtml(){
+  const rows=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M']];
+  return `<div class="keyboardMap">${rows.map((r,ri)=>`<div class="keyRow">${r.map((k,ci)=>`<div class="key">${k}<em>${ri+1},${ci+1}</em></div>`).join('')}</div>`).join('')}</div>`;
+}
+function clue(title,desc,html,key){
+  state.cluesSeen[key]=true; saveState(); setModal(title,desc,html,'wide',{review:true});
+}
+
+function renderScene(){
+  const s=state.currentScene; let bg=SCENES[s].bg;
+  if(s===10 && state.mirrorOpen) bg='assets/backgrounds/bg11.jpg';
+  sceneBg.src=bg; $('#sceneCanvas').classList.toggle('endingGlow',false); hotspots.innerHTML=''; updateHud();
+  renderHotspots(s);
+}
+
+function renderHotspots(s){
+  const terminal=()=>openPuzzleHub(s);
+  if(s===1){
+    addHotspot({x:29,y:21,w:44,h:35,tip:'中央回忆墙',action:()=>clue('中央回忆墙','五份档案的基础字段被重新整理。',CLUE_HTML.s1profiles,'s1profiles')});
+    addHotspot({x:14,y:18,w:12,h:31,tip:'MEMO 板',action:()=>clue('MEMO 板','零散采访索引被钉在这里。',CLUE_HTML.s1interview,'s1interview'),fragment:1});
+    addHotspot({x:30,y:58,w:43,h:18,tip:'三人组卡片',action:()=>clue('旧卡片','这些三人组会在后面再次出现。','<div class="puzzleIntro">573 / OK3 / C83。此时暂时看不出用途。</div>','s1cards')});
+    addHotspot({x:12,y:66,w:61,h:28,tip:'桌面文件',action:terminal,fragment:2});
+    addHotspot({x:74,y:44,w:22,h:25,tip:'成员资料卡',action:terminal,fragment:3});
+  } else if(s===2){
+    addHotspot({x:0,y:13,w:11,h:36,tip:'储物柜规则牌',action:()=>clue('储物柜规则','五个成员的输入顺序固定。','<div class="puzzleIntro">固定顺序：朱志鑫 → 张泽禹 → 张极 → 左航 → 苏新皓。</div>','s2order'),fragment:4});
+    addHotspot({x:12,y:10,w:50,h:82,tip:'成员柜门',action:()=>clue('柜门记录','柜门内侧留下了耳洞登记数字。',CLUE_HTML.s2ears,'s2ears')});
+    addHotspot({x:63,y:21,w:16,h:26,tip:'公告板',action:()=>clue('家庭提示卡','两张家庭字段被夹在公告板上。',CLUE_HTML.s2family,'s2family'),fragment:5});
+    addHotspot({x:72,y:63,w:22,h:18,tip:'长椅',action:terminal});
+    addHotspot({x:81,y:66,w:19,h:28,tip:'前台资料卡',action:()=>clue('宠物档案','当前家里宠物数量。',CLUE_HTML.s2pets,'s2pets'),fragment:6});
+  } else if(s===3){
+    addHotspot({x:0,y:12,w:28,h:63,tip:'白板',action:()=>clue('登言登语索引','五张语句卡背后留下成员名。',CLUE_HTML.s3quotes,'s3quotes'),fragment:7});
+    addHotspot({x:27,y:7,w:27,h:85,tip:'零食架 / 键盘卡',action:()=>{state.easter.keyboard=(state.easter.keyboard||0)+1;saveState();if(state.easter.keyboard===5)toast('检测结果：九宫格用户数量：0。','info');else if(state.easter.keyboard>5)toast('都说了是 26 键。','info');clue('26 键坐标图','五个人全都用 26 键。',CLUE_HTML.s3keyboard,'s3keyboard');}});
+    addHotspot({x:72,y:12,w:28,h:74,tip:'化妆镜',action:terminal,fragment:8});
+    addHotspot({x:61,y:59,w:10,h:29,tip:'化妆推车',action:()=>clue('标点运算卡','四种标点分别改变坐标取法。',CLUE_HTML.s3punct,'s3punct')});
+    addHotspot({x:54,y:0,w:18,h:99,tip:'黑色幕布',action:()=>clue('组合首字母','幕布背面只写了四个字母。','<div class="puzzleIntro mono">D / L / S / N</div>','s3initials')});
+    addHotspot({x:0,y:73,w:28,h:26,tip:'桌面档案盒',action:terminal,fragment:9});
+  } else if(s===4){
+    addHotspot({x:0,y:10,w:20,h:66,tip:'冰箱记录',action:()=>clue('第一天分房','冰箱侧面夹着第一天安排。',CLUE_HTML.s4day1,'s4day1'),fragment:10});
+    addHotspot({x:46,y:18,w:41,h:34,tip:'白色吊柜',action:()=>clue('第二天分房','吊柜门上贴着第二天安排。',CLUE_HTML.s4day2,'s4day2')});
+    addHotspot({x:89,y:22,w:11,h:39,tip:'右侧海报',action:()=>clue('第三天分房','海报背后是第三天安排。',CLUE_HTML.s4day3,'s4day3'),fragment:11});
+    addHotspot({x:18,y:43,w:59,h:55,tip:'中岛台',action:terminal});
+    addHotspot({x:20,y:36,w:57,h:26,tip:'食品包装 / 便签',action:()=>clue('房间权重公式','便签给出最终权重算法。',CLUE_HTML.s4formula,'s4formula'),fragment:12});
+  } else if(s===5){
+    addHotspot({x:0,y:5,w:22,h:66,tip:'游戏说明',action:()=>clue('角色笔画口径','为了避免笔画争议，现场直接给出统一口径。',CLUE_HTML.s5stroke,'s5stroke'),fragment:13});
+    addHotspot({x:24,y:31,w:43,h:31,tip:'五张角色牌',action:terminal});
+    addHotspot({x:74,y:20,w:14,h:45,tip:'指挥中心分类牌',action:()=>clue('衣着分类','领带/长裤与领结/短裤分组。',CLUE_HTML.s5groups,'s5groups'),fragment:14});
+    addHotspot({x:88,y:22,w:11,h:40,tip:'今日任务板',action:()=>clue('体力 / 脑力分类','另一组标签写在任务板上。',CLUE_HTML.s5groups,'s5groups2')});
+    addHotspot({x:72,y:61,w:27,h:32,tip:'军绿色箱子',action:terminal,fragment:15});
+  } else if(s===6){
+    addHotspot({x:49,y:0,w:35,h:100,tip:'舞蹈镜',action:()=>clue('三种关系','镜面亮起三个关系区域。',CLUE_HTML.s6relations,'s6relations'),fragment:16});
+    addHotspot({x:64,y:28,w:10,h:66,tip:'话筒架',action:terminal});
+    addHotspot({x:72,y:0,w:18,h:40,tip:'2ND 灯牌',action:()=>clue('生日档案提示','这局最后会用到具体“日期”，不是月份。','<div class="puzzleIntro">生日资料在第一局回看记录与成员档案中。</div>','s6birthday'),fragment:17});
+    addHotspot({x:75,y:32,w:12,h:34,tip:'二周年照片墙',action:()=>clue('MBTI 提示','关系集合会和第一局 MBTI 再次交叉。','<div class="puzzleIntro">INFP：朱志鑫 / 张极 / 左航。非 INFP：张泽禹 / 苏新皓。</div>','s6mbti')});
+    addHotspot({x:0,y:45,w:64,h:55,tip:'地面关系光谱',action:terminal,fragment:18});
+  } else if(s===7){
+    addHotspot({x:26,y:16,w:39,h:33,tip:'黑板',action:()=>clue('五个黑洞','黑板旁贴着五张游戏海报归属。',CLUE_HTML.s7games,'s7games'),fragment:19});
+    addHotspot({x:0,y:33,w:21,h:58,tip:'钢琴',action:()=>clue('排序规则','核心游戏名按汉字数量从短到长；同长度看出生月份。','<div class="puzzleIntro">短的在前。长度相同，出生月份早的在前。</div>','s7sort')});
+    addHotspot({x:14,y:36,w:22,h:57,tip:'乐谱架',action:terminal,fragment:20});
+    addHotspot({x:58,y:55,w:42,h:45,tip:'桌面 / 电脑',action:terminal,fragment:21});
+  } else if(s===8){
+    addHotspot({x:25,y:18,w:39,h:32,tip:'专辑黑板',action:()=>clue('《无所畏惧》笔画卡','四个字采用统一笔画口径。',CLUE_HTML.s8stroke,'s8stroke'),fragment:22});
+    addHotspot({x:14,y:35,w:22,h:58,tip:'乐谱架',action:()=>clue('完整曲目表','11 张曲目卡的原始目录。',CLUE_HTML.s8songs,'s8songs')});
+    addHotspot({x:57,y:55,w:43,h:45,tip:'歌曲卡 / CD',action:terminal,fragment:23});
+    addHotspot({x:65,y:44,w:20,h:25,tip:'右侧文件柜',action:()=>clue('CD Only 标签','设备清单上把第 10 首单独标注为 CD Only。','<div class="puzzleIntro">第 10 首：无所不能 TOP（CD Only）。完整专辑仍然是 11 首。</div>','s8cd')});
+    addHotspot({x:86,y:11,w:14,h:62,tip:'资料柜',action:terminal,fragment:24});
+  } else if(s===9){
+    addHotspot({x:18,y:6,w:35,h:42,tip:'TF FAMILY 资料墙',action:()=>clue('四个三人组','成员与名称来源被归档在同一面墙。',CLUE_HTML.s9trios,'s9trios'),fragment:25});
+    addHotspot({x:55,y:8,w:16,h:32,tip:'九格面板',action:()=>clue('组权重规则','这次给“组”加权，而不是给人编号。','<div class="puzzleIntro">规则：只把组名中真实出现的数字相加。</div>','s9weight')});
+    addHotspot({x:72,y:9,w:17,h:27,tip:'四张卡片',action:terminal,fragment:26});
+    addHotspot({x:0,y:51,w:29,h:44,tip:'左侧调音设备',action:terminal});
+    addHotspot({x:27,y:51,w:45,h:40,tip:'主控制台',action:terminal});
+    addHotspot({x:92,y:55,w:8,h:35,tip:'录音按钮',action:()=>clue('设备写入记录','控制室保留最后一次写入信息。','<div class="puzzleIntro mono">23:10　B 箱二周年联合授权器写入完成。<br>存放位置：镜后档案架。</div>','s9write'),fragment:27});
+  } else if(s===10){
+    if(!state.mirrorOpen){
+      addHotspot({x:55,y:4,w:31,h:83,tip:'大镜面',action:terminal});
+      addHotspot({x:73,y:3,w:23,h:64,tip:'二周年回忆墙',action:()=>clue('联合校验提示','最后一次要把前面多个字段真正连起来。','<div class="puzzleIntro">建议先打开“回看记录”，整理第二、四、六、九局结果。</div>','s10review')});
+      addHotspot({x:64,y:30,w:11,h:55,tip:'话筒架',action:terminal});
+      addHotspot({x:82,y:49,w:18,h:45,tip:'右侧柜子',action:terminal});
+    }else{
+      addHotspot({x:12,y:8,w:26,h:80,tip:'移开的镜面',action:()=>clue('镜后区域','镜面已经移开，隐藏储物架完全暴露。','<div class="puzzleIntro">第二层有 A / B 两只黑色存档箱。</div>','s10mirror')});
+      addHotspot({x:37,y:10,w:34,h:23,tip:'上层仪器',action:()=>clue('设备标签','箱体外观和标签都不足以直接判断。',CLUE_HTML.s10device,'s10device')});
+      addHotspot({x:38,y:35,w:14,h:27,tip:'A 箱',action:()=>openPuzzle(10,2)});
+      addHotspot({x:51,y:35,w:15,h:27,tip:'B 箱',action:()=>openPuzzle(10,2),fragment:state.solved[10][1]?28:null});
+      addHotspot({x:40,y:61,w:28,h:26,tip:'文件 / 授权模块',action:()=>state.solved[10][2]?clue('授权模块背面','黑色授权模块背面只有一句记录。','<div class=\"puzzleIntro\">它只保存成员之间的连接。</div>','s10module'):openPuzzle(10,3),fragment:state.solved[10][2]?29:null});
+      addHotspot({x:80,y:15,w:20,h:70,tip:'最终锁区 / 终端',action:()=>state.stageUnlocked?clue('终端底部','最终终端底部留下了最后一句。','<div class=\"puzzleIntro\">五个人可以拥有五份档案。可“登陆少年”，只能存在于他们彼此之间。</div>','s10terminal'):openPuzzleHub(10),fragment:state.stageUnlocked?30:null});
+      if(state.stageUnlocked) addHotspot({x:78,y:78,w:21,h:20,tip:'前往二周年舞台',action:showEnding});
+    }
+  }
+}
+
+function showSolvedReview(scene,p){
+  const r=state.records[recordKey(scene,p)];
+  setModal(`${SCENES[scene].puzzles[p-1]} · 复盘`,'这道题已经完成，可以随时回看中间结果。',`<div class="puzzleIntro"><strong>记录结果</strong><br><span class="recordValue">${escapeHtml(r?.result||'已完成')}</span></div><div class="card"><h3>推导记录</h3><p>${escapeHtml(r?.detail||'结果已写入联合档案。')}</p></div><div class="divider"></div><button id="backHub" class="secondary">返回本局解谜终端</button>`,'small',{review:true});
+  $('#backHub').onclick=()=>openPuzzleHub(scene);
+}
+function puzzleDone(scene,p,result,detail,message='机关校验通过。'){
+  solve(scene,p,result,detail);
+  const complete=sceneSolved(scene);
+  setModal(`${SCENES[scene].puzzles[p-1]} · 通过`,message,`<div class="puzzleIntro">结果已经自动写入<strong>回看记录</strong>，后面的组合题可以直接翻查。</div><div class="inputRow"><button id="backHub" class="primary">${complete&&scene<10?'查看本局完成状态':'返回解谜终端'}</button>${complete&&scene<10?`<button id="goNext" class="secondary">进入第 ${scene+1} 局</button>`:''}</div>`,'small',{review:true});
+  $('#backHub').onclick=()=>openPuzzleHub(scene);
+  if($('#goNext')) $('#goNext').onclick=()=>goScene(scene+1);
+}
+
+function openPuzzle(scene,p){
+  if(scene>state.unlockedScene || !canOpenPuzzle(scene,p)) return toast('上一道机关还没有解开。','bad');
+  if(state.solved[scene][p-1]) return showSolvedReview(scene,p);
+  currentPuzzle={scene,puzzle:p}; currentHintLevel=0;
+  if(scene===1) return puzzleScene1(p);
+  if(scene===2) return puzzleScene2(p);
+  if(scene===3) return puzzleScene3(p);
+  if(scene===4) return puzzleScene4(p);
+  if(scene===5) return puzzleScene5(p);
+  if(scene===6) return puzzleScene6(p);
+  if(scene===7) return puzzleScene7(p);
+  if(scene===8) return puzzleScene8(p);
+  if(scene===9) return puzzleScene9(p);
+  if(scene===10) return puzzleScene10(p);
+}
+
+function sequenceSelector(ids,needed,onCompleteText=''){ 
+  return {html:`${memberGrid(ids)}<div class="divider"></div><div class="label">当前顺序</div><div id="seqBox" class="choiceRow"><span class="muted">依次点击成员</span></div><div class="inputRow" style="margin-top:10px"><button id="clearSeq" class="secondary">重选</button><button id="submit" class="primary">确认顺序</button></div><div id="st" class="answerStatus"></div>`,bind:(expected,ok)=>{
+    const seq=[]; const box=$('#seqBox');
+    $$('.memberCard',modalBody).forEach(c=>c.onclick=()=>{ const id=c.dataset.member; if(seq.length>=needed)return; seq.push(id); c.classList.add('selected'); box.innerHTML=seq.map(x=>`<span class="choice active">${memberName(x)}</span>`).join(''); });
+    $('#clearSeq').onclick=()=>{seq.length=0;box.innerHTML='<span class="muted">依次点击成员</span>';$$('.memberCard',modalBody).forEach(c=>c.classList.remove('selected'));};
+    $('#submit').onclick=()=>{ if(seq.join('|')===expected.join('|')) ok(seq); else status($('#st'),'顺序没有通过校验。再回看场景线索。'); };
+  }};
+}
+
+function puzzleScene1(p){
+  if(p===1){
+    const ui=sequenceSelector(['sxh','zj','zzy','zh','zzx'],5);
+    setModal('谜题 1 · 生日顺序','五张生日卡散落。按照出生月份从早到晚排列。',`<div class="puzzleIntro">场景里的成员档案包含生日字段。先搜索，再排列。</div>${ui.html}`,'wide',{hints:true,scene:1,puzzle:1,review:true});
+    ui.bind(['sxh','zj','zzy','zh','zzx'],()=>puzzleDone(1,1,'苏新皓 → 张极 → 张泽禹 → 左航 → 朱志鑫','月份顺序：01 → 02 → 04 → 05 → 11。'));
+  }else if(p===2){
+    const zodiacs=['天蝎座','金牛座','水瓶座','双子座','摩羯座'], mbtis=['INFP','ESTJ','ENTJ'];
+    setModal('谜题 2 · 星座 × MBTI 档案校验','给五份成员档案同时补上星座和 MBTI。',`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><div class="memberMini"><img src="${MEMBERS[id].img}"><b>${MEMBERS[id].name}</b></div><div class="label" style="margin-top:8px">星座</div><select id="z_${id}" class="selectInput">${simpleOptions(zodiacs)}</select><div class="label" style="margin-top:7px">MBTI</div><select id="m_${id}" class="selectInput">${simpleOptions(mbtis)}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">提交五份档案</button><div id="st" class="answerStatus"></div></div>`,'xwide',{hints:true,scene:1,puzzle:2,review:true});
+    $('#submit').onclick=()=>{ const ok=MEMBER_ORDER.every(id=>$(`#z_${id}`).value===MEMBERS[id].zodiac&&$(`#m_${id}`).value===MEMBERS[id].mbti); if(ok)puzzleDone(1,2,'五份个人档案：确认','朱志鑫 天蝎/INFP；张泽禹 金牛/ESTJ；张极 水瓶/INFP；左航 双子/INFP；苏新皓 摩羯/ENTJ。','第六个灰色档案槽亮了一下，却仍然显示：无法生成。'); else status($('#st'),'至少有一份档案的星座或 MBTI 没有对应上。'); };
+  }else if(p===3){
+    setModal('谜题 3 · “最……”问卷','按照采访问题原顺序，为五个问题分别选出成员。',`<div class="inputCol">${MOST_Q.map(([q],i)=>`<div class="card"><div class="label">问题 ${i+1}</div><b>${escapeHtml(q)}</b><select id="q${i}" class="selectInput" style="margin-top:8px">${memberOptions()}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认问卷</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:1,puzzle:3,review:true});
+    $('#submit').onclick=()=>{ const ok=MOST_Q.every(([,id],i)=>$(`#q${i}`).value===id); if(ok)puzzleDone(1,3,'张极 → 朱志鑫 → 张泽禹 → 左航 → 苏新皓','问卷原顺序对应成员：张极 / 朱志鑫 / 张泽禹 / 左航 / 苏新皓。'); else status($('#st'),'问卷里还有成员没有对应正确。'); };
+  }else if(p===4){
+    setModal('谜题 4 · 档案差值','名字不要。留下上一题五个人的出生月份，再看相邻两个人之间差了多少。',`<div class="puzzleIntro">如果忘了谜题 3 的顺序，直接点右上角<strong>回看</strong>。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric" placeholder="四位数"><button id="submit" class="primary">提交</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:1,puzzle:4,review:true});
+    $('#submit').onclick=()=>{ if(norm($('#answer').value)==='9714') puzzleDone(1,4,'9714','02 / 11 / 04 / 05 / 01 的相邻绝对差为 9 / 7 / 1 / 4。','资料柜打开，获得联合校验记录 01。'); else status($('#st'),'机关没有反应。相邻差值还有哪里没对应上。'); };
+  }
+}
+
+function fiveNumberInputs(prefix,valuesHint=''){ return `<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><input id="${prefix}_${id}" class="numInput" type="number" min="0" max="20" value="0"></div>`).join('')}</div>${valuesHint}`; }
+function readFive(prefix){ return MEMBER_ORDER.map(id=>Number($(`#${prefix}_${id}`).value)); }
+
+function puzzleScene2(p){
+  if(p===1){
+    setModal('谜题 1 · 耳洞','五个成员，三种数字字段。先完成第一排身份校验。',`${fiveNumberInputs('ear')}<div style="margin-top:12px"><button id="submit" class="primary">确认耳洞记录</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:2,puzzle:1,review:true});
+    $('#submit').onclick=()=>{ const v=readFive('ear'); if(v[0]>9) toast('档案管理员：你先冷静一下。','info'); const exp=MEMBER_ORDER.map(id=>MEMBERS[id].ear); if(v.join(',')===exp.join(',')) puzzleDone(2,1,'9 / 0 / 0 / 2 / 0','固定顺序：朱志鑫 9、张泽禹 0、张极 0、左航 2、苏新皓 0。'); else status($('#st'),'数字和柜门记录没有完全对应。'); };
+  }else if(p===2){
+    setModal('谜题 2 · 兄弟姐妹','第二排字段来自柜子里的两张家庭提示卡。',`${fiveNumberInputs('sib')}<div style="margin-top:12px"><button id="submit" class="primary">确认家庭字段</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:2,puzzle:2,review:true});
+    $('#submit').onclick=()=>{ const exp=MEMBER_ORDER.map(id=>MEMBERS[id].sibling); if(readFive('sib').join(',')===exp.join(','))puzzleDone(2,2,'0 / 0 / 1 / 0 / 1','张极有一位姐姐，苏新皓有一位弟弟，其余为 0。');else status($('#st'),'家庭字段没有完全对应。'); };
+  }else if(p===3){
+    setModal('谜题 3 · 现在家里的宠物','第三排字段来自前台资料卡。',`${fiveNumberInputs('pet')}<div style="margin-top:12px"><button id="submit" class="primary">确认宠物字段</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:2,puzzle:3,review:true});
+    $('#submit').onclick=()=>{ const exp=MEMBER_ORDER.map(id=>MEMBERS[id].pet); if(readFive('pet').join(',')===exp.join(','))puzzleDone(2,3,'0 / 3 / 1 / 1 / 0','固定顺序：朱志鑫 0、张泽禹 3、张极 1、左航 1、苏新皓 0。');else status($('#st'),'有宠物数量没有对上。'); };
+  }else if(p===4){
+    setModal('谜题 4 · 三字段身份值','控制器显示：身份值 = 耳洞 + 2 × 宠物 + 3 × 兄弟姐妹。',`<div class="puzzleIntro">三排数据都已写进<strong>回看记录</strong>。固定成员顺序不变。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric" placeholder="五位数字"><button id="submit" class="primary">计算并提交</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:2,puzzle:4,review:true});
+    $('#submit').onclick=()=>{ const a=norm($('#answer').value); if(['98543','96543'].includes(a)){ const logical=a==='96543'; puzzleDone(2,4,a,logical?'按本局最新字段直接计算：9 / 6 / 5 / 4 / 3。':'按剧本终端记录值保存：9 / 8 / 5 / 4 / 3。','获得联合校验记录 02。'); } else status($('#st'),'机关没有反应。重新核对三排字段和加权公式。'); };
+  }
+}
+
+function quoteOptions(){ return `<option value="">选择成员</option>`+MEMBER_ORDER.map(id=>`<option value="${id}">${MEMBERS[id].name}</option>`).join(''); }
+function puzzleScene3(p){
+  if(p===1){
+    const quotes=Object.entries(QUOTES);
+    setModal('谜题 1 · 这是谁说的','桌面散落五张“登言登语”，为每句话配人。',`<div class="inputCol">${quotes.map(([id,q],i)=>`<div class="card"><p>“${escapeHtml(q)}”</p><select id="q${i}" class="selectInput">${quoteOptions()}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认五张语音贴纸</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:3,puzzle:1,review:true});
+    $('#submit').onclick=()=>{ if(quotes.every(([id],i)=>$(`#q${i}`).value===id))puzzleDone(3,1,'五句登言登语全部归档','苏新皓：他们生三个…；左航：摄影师…；张泽禹：小宝甜…；朱志鑫：鸡丝凉面…；张极：哪有持续…。','镜面亮起：润！闷。哈？哟～');else status($('#st'),'还有语句和成员没有对应上。'); };
+  }else if(p===2){
+    setModal('谜题 2 · “润！闷。哈？哟～”','取拼音首字母的 26 键坐标，再按标点运算。',`<div class="grid two"><div class="card">${keyboardHtml()}</div><div class="card"><h3>标点运算</h3><p>！ = 取列</p><p>。 = 取行</p><p>？ = 行 + 列</p><p>～ = 列 - 行</p></div></div><div class="inputRow" style="margin-top:12px"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric"><button id="submit" class="primary">提交四位密码</button></div><div id="st" class="answerStatus"></div>`,'wide',{hints:true,scene:3,puzzle:2,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='4385')puzzleDone(3,2,'4385','润 R→第1行第4列取列=4；闷 M→第3行取行=3；哈 H→2+6=8；哟 Y→6-1=5。');else status($('#st'),'坐标或标点运算没有完全对应。');};
+  }else if(p===3){
+    setModal('谜题 3 · “登陆少年”的 26 键坐标','首字母 D / L / S / N。仍然使用 26 键坐标，行号 + 列号，大于 9 只保留个位。',`<div class="puzzleIntro">如果忘记键盘行列，回看上一题，或重新点击场景里的键盘卡。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric"><button id="submit" class="primary">提交</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:3,puzzle:3,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='5149')puzzleDone(3,3,'5149','D=2+3=5；L=2+9=11→1；S=2+2=4；N=3+6=9。');else status($('#st'),'组合首字母的坐标还没有完全对上。');};
+  }else if(p===4){
+    setModal('谜题 4 · 两个口令的距离','机关问：还记得上两次的密码吗？一个来自他们说的话，一个来自他们的名字。求每一位之间的距离。',`<div class="puzzleIntro">不用硬记。右上角<strong>回看</strong>里已经保存谜题 2、3 的结果。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric"><button id="submit" class="primary">提交距离</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:3,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='1244')puzzleDone(3,4,'1244','4385 与 5149 逐位绝对差：1 / 2 / 4 / 4。','获得联合校验记录 03。');else status($('#st'),'机关没有反应。不要把两个四位数整体相减。');};
+  }
+}
+
+const PAIRS=[]; for(let i=0;i<MEMBER_ORDER.length;i++)for(let j=i+1;j<MEMBER_ORDER.length;j++)PAIRS.push([MEMBER_ORDER[i],MEMBER_ORDER[j]]);
+function pairValue(a,b){ return [a,b].sort().join('+'); }
+function pairOptions(){ return `<option value="">选择同住组合</option>`+PAIRS.map(([a,b])=>`<option value="${pairValue(a,b)}">${memberName(a)} + ${memberName(b)}</option>`).join(''); }
+function puzzleScene4(p){
+  if(p===1){
+    setModal('谜题 1 · 还原三天房间','根据三天住宿安排，选出每天真正同住的组合。',`<div class="grid three"><div class="card"><h3>第一天</h3><select id="d1" class="selectInput">${pairOptions()}</select><p>其余三人单独。</p></div><div class="card"><h3>第二天</h3><select id="d2a" class="selectInput">${pairOptions()}</select><select id="d2b" class="selectInput" style="margin-top:7px">${pairOptions()}</select><p>其余一人单独。</p></div><div class="card"><h3>第三天</h3><select id="d3a" class="selectInput">${pairOptions()}</select><select id="d3b" class="selectInput" style="margin-top:7px">${pairOptions()}</select><p>其余一人单独。</p></div></div><div class="inputRow" style="margin-top:12px"><button id="allTogether" class="ghost">试试五人同住</button><button id="submit" class="primary">校验分房</button></div><div id="st" class="answerStatus"></div>`,'wide',{hints:true,scene:4,puzzle:1,review:true});
+    $('#allTogether').onclick=()=>toast('这不是宿舍团建模拟器。','info');
+    $('#submit').onclick=()=>{ const d1=$('#d1').value, d2=[$('#d2a').value,$('#d2b').value].sort(),d3=[$('#d3a').value,$('#d3b').value].sort(); const ok=d1===pairValue('zj','zzy')&&d2.join('|')===[pairValue('zzx','zh'),pairValue('zzy','zj')].sort().join('|')&&d3.join('|')===[pairValue('zzx','zh'),pairValue('zzy','sxh')].sort().join('|'); if(ok)puzzleDone(4,1,'433','第一天 4 间；第二天 3 间；第三天 3 间。','三天分房表恢复完成。');else status($('#st'),'至少有一天的同住组合不对。'); };
+  }else if(p===2){
+    setModal('谜题 2 · 谁和谁真正住过一起','把三天转换成关系边。为每一对成员填写共同住宿夜数。',`<div class="relationMatrix"><table class="relationTable"><thead><tr><th>成员关系</th><th>共同住宿夜数</th></tr></thead><tbody>${PAIRS.map(([a,b],i)=>`<tr><td>${memberName(a)} ↔ ${memberName(b)}</td><td><input id="pair${i}" class="numInput" type="number" min="0" max="3" value="0"></td></tr>`).join('')}</tbody></table></div><div style="margin-top:12px"><button id="submit" class="primary">提交关系图</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:4,puzzle:2,review:true});
+    $('#submit').onclick=()=>{ const expected={ [pairValue('zj','zzy')]:2,[pairValue('zzx','zh')]:2,[pairValue('zzy','sxh')]:1 }; const ok=PAIRS.every(([a,b],i)=>Number($(`#pair${i}`).value)===(expected[pairValue(a,b)]||0)); if(ok)puzzleDone(4,2,'张极↔张泽禹 2；朱志鑫↔左航 2；张泽禹↔苏新皓 1','三天分房转成关系边，其余成员对共同住宿均为 0。');else status($('#st'),'关系边的夜数还没有完全对上。'); };
+  }else if(p===3){
+    const co={zzx:2,zzy:3,zj:2,zh:2,sxh:1},single={zzx:1,zzy:0,zj:1,zh:1,sxh:2};
+    setModal('谜题 3 · 个人住宿统计','统计每个人三天中“与别人同住”和“单独住宿”的夜数。',`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><div class="label">同住夜数</div><input id="co_${id}" class="numInput" type="number" min="0" max="3" value="0"><div class="label" style="margin-top:8px">单住夜数</div><input id="sg_${id}" class="numInput" type="number" min="0" max="3" value="0"></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">提交统计</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:4,puzzle:3,review:true});
+    $('#submit').onclick=()=>{ const ok=MEMBER_ORDER.every(id=>Number($(`#co_${id}`).value)===co[id]&&Number($(`#sg_${id}`).value)===single[id]); if(ok)puzzleDone(4,3,'同住 2/3/2/2/1；单住 1/0/1/1/2','固定顺序朱志鑫、张泽禹、张极、左航、苏新皓。');else status($('#st'),'个人统计还有数字没有核对到三天。'); };
+  }else if(p===4){
+    setModal('谜题 4 · 房间权重','房间权重 = （同住夜数 × 0.5 + 单住夜数）向上取整。',`<div class="puzzleIntro">上一题两排统计已经写入回看记录。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"><button id="submit" class="primary">提交五人权重</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:4,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='22223')puzzleDone(4,4,'2 - 2 - 2 - 2 - 3','朱志鑫 2；张泽禹 2；张极 2；左航 2；苏新皓 3。','获得联合校验记录 04。');else status($('#st'),'权重结果没有通过。注意 1.5 和 2.5 都要向上取整。');};
+  }
+}
+
+function puzzleScene5(p){
+  if(p===1){
+    const roles=[['强',12],['花',7],['壮',6],['香',9],['锤',13]];
+    setModal('谜题 1 · 角色笔画','墙上提供统一笔画口径，为五张角色牌录入数字。',`<div class="grid five">${roles.map(([r])=>`<div class="card"><h3>${r}</h3><input id="r_${r}" class="numInput" type="number" min="0" max="30" value="0"></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认笔画</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:5,puzzle:1,review:true});
+    $('#submit').onclick=()=>{ if(roles.every(([r,n])=>Number($(`#r_${r}`).value)===n))puzzleDone(5,1,'12 / 7 / 6 / 9 / 13','角色牌固定顺序：强、花、壮、香、锤。');else status($('#st'),'笔画口径没有全部对应上。'); };
+  }else if(p===2){
+    setModal('谜题 2 · 角色差值','五个角色排成一队。不看本身，看相邻之间差多少。',`<div class="puzzleIntro">谜题 1 的五个数字可在右上角回看。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric"><button id="submit" class="primary">提交四位差值</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:5,puzzle:2,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='5134')puzzleDone(5,2,'5134','|12-7|=5，|7-6|=1，|6-9|=3，|9-13|=4。');else status($('#st'),'相邻差值还没完全对应。');};
+  }else if(p===3){
+    const qs=[
+      ['A','领带长裤 ∩ 体力组 ∩ 有兄弟姐妹','zj'],
+      ['B','领带长裤 ∩ 体力组 ∩ 无兄弟姐妹','zzx'],
+      ['C','领带长裤 ∩ 脑力组','zh'],
+      ['D','领结短裤 ∩ 体力组','sxh'],
+      ['E','领结短裤 ∩ 脑力组','zzy']
+    ];
+    setModal('谜题 3 · 四个集合交叉定位','每一道都让玩家选择具体成员；选错可以重新选。',`<div class="inputCol">${qs.map(([l,q],i)=>`<div class="card"><div class="label">${l}</div><b>${escapeHtml(q)}</b><select id="q${i}" class="selectInput" style="margin-top:8px">${memberOptions()}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">执行五次交叉定位</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:5,puzzle:3,review:true});
+    $('#submit').onclick=()=>{ if(qs.every((x,i)=>$(`#q${i}`).value===x[2]))puzzleDone(5,3,'张极 → 朱志鑫 → 左航 → 苏新皓 → 张泽禹','A 张极；B 朱志鑫；C 左航；D 苏新皓；E 张泽禹。');else status($('#st'),'有交叉集合定位错了，重新选择即可。'); };
+  }else if(p===4){
+    setModal('谜题 4 · 两组差值叠加','取谜题 3 五人的出生月份做相邻差，再与角色牌差值逐位相加，只保留个位。',`<div class="puzzleIntro">这题同时依赖谜题 2 和谜题 3。忘记任何一组结果都可以打开<strong>回看</strong>。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="4" inputmode="numeric"><button id="submit" class="primary">提交叠加结果</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:5,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='4777')puzzleDone(5,4,'4777','成员月份 02/11/05/01/04 → 相邻差 9643；与 5134 逐位相加取个位 → 4777。','获得联合校验记录 05。');else status($('#st'),'两组四位差值叠加后没有通过。');};
+  }
+}
+
+function relationChecks(group,idPrefix){
+  return `<div class="card"><h3>${group}</h3><div class="checkGrid">${MEMBER_ORDER.map(id=>`<label class="checkCard"><input type="checkbox" id="${idPrefix}_${id}">${MEMBERS[id].name}</label>`).join('')}</div></div>`;
+}
+function checkedMembers(prefix){ return MEMBER_ORDER.filter(id=>$(`#${prefix}_${id}`)?.checked); }
+function puzzleScene6(p){
+  if(p===1){
+    setModal('谜题 1 · 歌曲关系归组','爱情、友情、亲情三个关系区域可以重复出现同一个人。',`<div class="inputCol">${relationChecks('爱情','love')}${relationChecks('友情','friend')}${relationChecks('亲情','family')}</div><div style="margin-top:12px"><button id="submit" class="primary">点亮三种关系</button><div id="st" class="answerStatus"></div></div>`,'xwide',{hints:true,scene:6,puzzle:1,review:true});
+    $('#submit').onclick=()=>{ const ok=sameSet(checkedMembers('love'),['zzx','sxh'])&&sameSet(checkedMembers('friend'),['zh','sxh'])&&sameSet(checkedMembers('family'),['zj','zzy']); if(ok)puzzleDone(6,1,'爱情：朱志鑫/苏新皓；友情：左航/苏新皓；亲情：张极/张泽禹','三个关系集合归组完成，苏新皓在两个关系中重复出现。'); else status($('#st'),'至少有一个关系区域没有归组正确。'); };
+  }else if(p===2){
+    setModal('谜题 2 · 一个人可以出现几次','统计每个人在三个关系中出现的次数，并指出唯一出现两次的人。',`<div class="grid two"><div class="card"><div class="label">唯一出现两次的人</div><select id="who" class="selectInput">${memberOptions()}</select></div><div class="card"><div class="label">固定顺序的五位次数</div><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"></div></div><div style="margin-top:12px"><button id="submit" class="primary">写入关系次数</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:6,puzzle:2,review:true});
+    $('#submit').onclick=()=>{if($('#who').value==='sxh'&&norm($('#answer').value)==='11112')puzzleDone(6,2,'11112','朱志鑫 1、张泽禹 1、张极 1、左航 1、苏新皓 2。');else status($('#st'),'重复出现的人或五位次数不对。');};
+  }else if(p===3){
+    const qs=[['爱情 ∩ INFP','zzx'],['爱情 ∩ 非 INFP','sxh'],['友情 ∩ INFP','zh'],['亲情 ∩ INFP','zj'],['亲情 ∩ 非 INFP','zzy']];
+    setModal('谜题 3 · 关系 × MBTI','把谜题 1 的关系集合与第一局 MBTI 再做一次交叉。',`<div class="puzzleIntro">忘了第一局 MBTI？右上角回看可以直接查。</div><div class="inputCol">${qs.map(([q],i)=>`<div class="card"><b>${q}</b><select id="q${i}" class="selectInput" style="margin-top:7px">${memberOptions()}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认交叉顺序</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:6,puzzle:3,review:true});
+    $('#submit').onclick=()=>{if(qs.every((x,i)=>$(`#q${i}`).value===x[1]))puzzleDone(6,3,'朱志鑫 → 苏新皓 → 左航 → 张极 → 张泽禹','按五个交叉条件得到唯一成员顺序。');else status($('#st'),'关系集合和 MBTI 交叉后还有成员不对。');};
+  }else if(p===4){
+    setModal('谜题 4 · 日期尾数','不要月份。这次只看上一题五个人生日“日期”的最后一位。',`<div class="puzzleIntro">顺序来自谜题 3；生日资料来自第一局。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"><button id="submit" class="primary">提交日期尾数</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:6,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='92230')puzzleDone(6,4,'92230','朱志鑫 19→9；苏新皓 12→2；左航 22→2；张极 03→3；张泽禹 30→0。','获得联合校验记录 06。');else status($('#st'),'日期尾数没有通过。注意不是月份。');};
+  }
+}
+
+function puzzleScene7(p){
+  const games=MEMBER_ORDER.map(id=>MEMBERS[id].game);
+  if(p===1){
+    setModal('谜题 1 · 黑洞游戏对应','五张游戏海报分别属于五个人。',`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><div class="memberMini"><img src="${MEMBERS[id].img}"><b>${MEMBERS[id].name}</b></div><select id="g_${id}" class="selectInput" style="margin-top:8px">${simpleOptions(games)}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认五个黑洞</button><div id="st" class="answerStatus"></div></div>`,'xwide',{hints:true,scene:7,puzzle:1,review:true});
+    $('#submit').onclick=()=>{if(MEMBER_ORDER.every(id=>$(`#g_${id}`).value===MEMBERS[id].game))puzzleDone(7,1,'五个黑洞游戏全部对应','朱志鑫憋笑；张泽禹认人；张极恐怖箱；左航蒙眼踢足球；苏新皓不能做挑战。');else status($('#st'),'还有游戏海报没有对应到正确成员。');};
+  }else if(p===2){
+    const ui=sequenceSelector(['zzy','zzx','sxh','zh','zj'],5);
+    setModal('谜题 2 · 按照名字长度排序','只计算核心游戏名汉字数量。短的在前；长度相同，出生月份早的在前。',`<div class="puzzleIntro">4 字、5 字、8 字。先分长度，再处理同长度。</div>${ui.html}`,'wide',{hints:true,scene:7,puzzle:2,review:true});
+    ui.bind(['zzy','zzx','sxh','zh','zj'],()=>puzzleDone(7,2,'张泽禹 → 朱志鑫 → 苏新皓 → 左航 → 张极','4字组：张泽禹(04)→朱志鑫(11)；5字组：苏新皓(01)→左航(05)；8字：张极。'));
+  }else if(p===3){
+    setModal('谜题 3 · “最……”身份复核','电脑重新弹出第一局五个“最”问题。',`<div class="puzzleIntro">这一次允许你直接使用<strong>回看记录</strong>，目的是确认排序结果是一串可复用成员顺序。</div><div class="inputCol">${MOST_Q.map(([q],i)=>`<div class="card"><b>${escapeHtml(q)}</b><select id="q${i}" class="selectInput" style="margin-top:7px">${memberOptions()}</select></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">复核问卷</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:7,puzzle:3,review:true});
+    $('#submit').onclick=()=>{if(MOST_Q.every(([,id],i)=>$(`#q${i}`).value===id))puzzleDone(7,3,'第一局问卷复核通过','五个“最”与第一局完全一致；当前需要保留谜题 2 的成员排序。');else status($('#st'),'复核结果和第一局记录不一致。');};
+  }else if(p===4){
+    setModal('谜题 4 · 跨局字段','按照谜题 2 顺序，对五个人依次计算：耳洞 + 宠物 + 兄弟姐妹。',`<div class="puzzleIntro">这是明确的跨局题。第二局三个字段和第七局排序都可以从<strong>回看记录</strong>翻出。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"><button id="submit" class="primary">提交五位结果</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:7,puzzle:4,review:true});
+    $('#submit').onclick=()=>{const a=norm($('#answer').value);if(['59112','39132'].includes(a)){puzzleDone(7,4,a,a==='39132'?'按第二局最新耳洞字段直接计算：张泽禹3、朱志鑫9、苏新皓1、左航3、张极2。':'按剧本终端保留校验串：5 / 9 / 1 / 1 / 2。','获得联合校验记录 07。');}else status($('#st'),'跨局字段没有通过。先回看第二局的三排数据。');};
+  }
+}
+
+function renderSortList(order){
+  return `<div class="sortList">${order.map((idx,pos)=>`<div class="sortItem" data-pos="${pos}"><div class="sortIndex">${String(pos+1).padStart(2,'0')}</div><div>${escapeHtml(SONGS[idx])}</div><div class="sortButtons"><button type="button" data-move="up">↑</button><button type="button" data-move="down">↓</button></div></div>`).join('')}</div>`;
+}
+function bindSongSort(){
+  $$('.sortButtons button',modalBody).forEach(b=>b.onclick=()=>{const item=b.closest('.sortItem'),pos=Number(item.dataset.pos),dir=b.dataset.move;if(dir==='up'&&pos>0)[currentSongOrder[pos-1],currentSongOrder[pos]]=[currentSongOrder[pos],currentSongOrder[pos-1]];if(dir==='down'&&pos<currentSongOrder.length-1)[currentSongOrder[pos+1],currentSongOrder[pos]]=[currentSongOrder[pos],currentSongOrder[pos+1]];$('#songSortWrap').innerHTML=renderSortList(currentSongOrder);bindSongSort();});
+}
+function puzzleScene8(p){
+  if(p===1){
+    currentSongOrder=[5,0,9,2,10,3,7,1,8,4,6];
+    setModal('谜题 1 · 恢复 11 首完整曲序','11 张歌曲卡被打乱。用上下箭头恢复完整曲序。',`<div id="songSortWrap">${renderSortList(currentSongOrder)}</div><div style="margin-top:12px"><button id="submit" class="primary">确认曲序</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:8,puzzle:1,review:true});bindSongSort();
+    $('#submit').onclick=()=>{if(currentSongOrder.every((v,i)=>v===i))puzzleDone(8,1,'01 → 11 完整曲序恢复','《无所畏惧》共 11 首；第 10 首虽为 CD Only 仍属于完整曲序。');else status($('#st'),'曲序仍有卡片不在正确位置。');};
+  }else if(p===2){
+    const withParen=[1,2,4,5,6,8,10,11];
+    setModal('谜题 2 · 括号集合','不看歌名内容，只判断标题里有没有括号补充信息；分别加和求差。',`<div class="checkGrid">${SONGS.map((s,i)=>`<label class="checkCard"><input type="checkbox" id="song_${i+1}"><b>${String(i+1).padStart(2,'0')}</b><br>${escapeHtml(s)}</label>`).join('')}</div><div class="divider"></div><div class="inputRow"><label class="label">两组序号和的差：</label><input id="answer" class="textInput mono" maxlength="2" inputmode="numeric"><button id="submit" class="primary">提交集合运算</button></div><div id="st" class="answerStatus"></div>`,'xwide',{hints:true,scene:8,puzzle:2,review:true});
+    $('#submit').onclick=()=>{const selected=SONGS.map((_,i)=>i+1).filter(n=>$(`#song_${n}`).checked);if(sameSet(selected,withParen)&&norm($('#answer').value)==='28')puzzleDone(8,2,'28','有括号序号和 47；无括号序号和 19；47 - 19 = 28。');else status($('#st'),'括号集合或两组求差没有通过。');};
+  }else if(p===3){
+    setModal('谜题 3 · “无所畏惧”不是总笔画','机关提供统一笔画卡。填写四个字的笔画，再做“后一个字减前一个字”。',`<div class="grid four">${['无','所','畏','惧'].map(ch=>`<div class="card"><h3>${ch}</h3><input id="st_${ch}" class="numInput" type="number" min="0" max="30" value="0"></div>`).join('')}</div><div class="inputRow" style="margin-top:12px"><label class="label">三位差值：</label><input id="answer" class="textInput mono" maxlength="3" inputmode="numeric"><button id="submit" class="primary">确认</button></div><div id="st" class="answerStatus"></div>`,'wide',{hints:true,scene:8,puzzle:3,review:true});
+    $('#submit').onclick=()=>{const ok=Number($('#st_无').value)===4&&Number($('#st_所').value)===8&&Number($('#st_畏').value)===9&&Number($('#st_惧').value)===11&&norm($('#answer').value)==='412';if(ok)puzzleDone(8,3,'412','无4、所8、畏9、惧11；8-4=4，9-8=1，11-9=2。');else status($('#st'),'笔画口径或三段差值没有通过。');};
+  }else if(p===4){
+    setModal('谜题 4 · 专辑校验串','控制器要求三段：标题笔画差；括号集合差 - CD Only 曲目序号；完整曲目数量。',`<div class="puzzleIntro">前 3 题的中间结果全部可以回看。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="7" inputmode="numeric"><button id="submit" class="primary">提交七位校验串</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:8,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='4121811')puzzleDone(8,4,'4121811','412 | (28-10=18) | 11 → 4121811。','获得联合校验记录 08。');else status($('#st'),'三段校验串没有通过。');};
+  }
+}
+
+function trioMembershipCard(name){return `<div class="card"><h3>${name}</h3><div class="checkGrid">${MEMBER_ORDER.map(id=>`<label class="checkCard"><input type="checkbox" id="tr_${name}_${id}">${MEMBERS[id].name}</label>`).join('')}</div><div class="label" style="margin-top:8px">名称来源</div><select id="desc_${name}" class="selectInput">${simpleOptions([...Object.values(TRIOS).map(t=>t.desc),'5号 / 7号 / 3号'])}</select></div>`;}
+function puzzleScene9(p){
+  if(p===1){
+    setModal('谜题 1 · 名称来源','四个三人组的名称不是“一个字符代表一个人”。还原成员与名称来源。',`<div class="grid two">${Object.keys(TRIOS).map(trioMembershipCard).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认四个三人组</button><div id="st" class="answerStatus"></div></div>`,'xwide',{hints:true,scene:9,puzzle:1,review:true});
+    $('#submit').onclick=()=>{ if($('#desc_573').value==='5号 / 7号 / 3号'){state.easter.trio=(state.easter.trio||0)+1;saveState();toast(state.easter.trio>1?'573 是三个人都在 57 中读过中学。':'请停止把组合名字拆成人。','info');return;} const ok=Object.entries(TRIOS).every(([name,t])=>sameSet(MEMBER_ORDER.filter(id=>$(`#tr_${name}_${id}`).checked),t.members)&&$(`#desc_${name}`).value===t.desc); if(ok)puzzleDone(9,1,'四个三人组全部归档','573：张泽禹/张极/左航；OK3：朱志鑫/张极/左航；C83：朱志鑫/张极/苏新皓；打瓦3：朱志鑫/张泽禹/左航。');else status($('#st'),'成员集合或名称来源还有错误。'); };
+  }else if(p===2){
+    const exp={zzx:3,zzy:2,zj:3,zh:3,sxh:1};
+    setModal('谜题 2 · 四集合成员出现次数','统计每个人出现在几个三人组。',`${fiveNumberInputs('cnt')}<div style="margin-top:12px"><button id="submit" class="primary">提交五位次数</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:9,puzzle:2,review:true});
+    $('#submit').onclick=()=>{if(MEMBER_ORDER.every(id=>Number($(`#cnt_${id}`).value)===exp[id]))puzzleDone(9,2,'32331','朱志鑫3、张泽禹2、张极3、左航3、苏新皓1；这组数据会在最终局再次使用。');else status($('#st'),'成员出现次数没有完全对上四个集合。');};
+  }else if(p===3){
+    setModal('谜题 3 · 给“组”加权','只把组名中真实出现的数字相加。',`<div class="grid four">${Object.entries(TRIOS).map(([name])=>`<div class="card"><h3>${name}</h3><input id="w_${name}" class="numInput" type="number" min="0" max="30" value="0"></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">确认四组权重</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:9,puzzle:3,review:true});
+    $('#submit').onclick=()=>{if(Object.entries(TRIOS).every(([name,t])=>Number($(`#w_${name}`).value)===t.weight))puzzleDone(9,3,'15 / 3 / 11 / 3','573=5+7+3=15；OK3=3；C83=8+3=11；打瓦3=3。');else status($('#st'),'至少有一个“组”权重不对。');};
+  }else if(p===4){
+    setModal('谜题 4 · 成员的组权重总和','先计算每个人参与的所有组权重总和；再按出生月份从早到晚排序，只取个位。',`<div class="puzzleIntro">谜题 1 和谜题 3 都要回看。第一局生日月份也会用到。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"><button id="submit" class="primary">提交最终五位密码</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:9,puzzle:4,review:true});
+    $('#submit').onclick=()=>{if(norm($('#answer').value)==='19817')puzzleDone(9,4,'19817','组权重总和：朱17、禹18、极29、航21、苏11；按月份苏/极/禹/航/朱排序取个位 → 1/9/8/1/7。','ARCHIVE 06 · DATA COMPLETENESS：96%。获得联合校验记录 09。');else status($('#st'),'最终五位密码没有通过。');};
+  }
+}
+
+function puzzleScene10(p){
+  if(p===1){
+    setModal('谜题 1 · 六字段联合校验','前九次只是确认资料。最后一次，请证明这些资料能够连接起来。',`<div class="puzzleIntro">固定成员顺序：朱志鑫 → 张泽禹 → 张极 → 左航 → 苏新皓。<br>每个人计算：耳洞 + 宠物 + 兄弟姐妹 + 与别人同住夜数 + 三人组出现次数 + 歌曲关系参与次数，最后只保留个位。</div><div class="inputRow"><input id="answer" class="textInput mono" maxlength="5" inputmode="numeric"><button id="submit" class="primary">执行联合校验</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:10,puzzle:1,review:true});
+    $('#submit').onclick=()=>{const a=norm($('#answer').value);if(['51875','59895'].includes(a)){solve(10,1,a,a==='59895'?'按第二局最新耳洞字段与后续记录直接合并得到 5/9/8/9/5。':'按剧本终端保留联合校验串得到 5/1/8/7/5。');state.mirrorOpen=true;saveState();closeModal();$('#sceneCanvas').classList.add('transitioning');setTimeout(()=>{$('#sceneCanvas').classList.remove('transitioning');renderScene();toast('镜面发出机械声，缓慢向一侧移动。','good');setTimeout(()=>openPuzzleHub(10),500);},650);}else status($('#st'),'联合校验没有通过。建议先打开回看记录整理六个字段。');};
+  }else if(p===2){
+    if(!state.mirrorOpen)return toast('镜面还没有移开。','bad');
+    setModal('谜题 2 · A 还是 B','镜后第二层有两个黑色存档箱，外观和残缺标签都不足以判断。',`<div class="grid two"><button id="boxA" class="card" style="cursor:pointer"><h3>A 箱</h3><p>点击检查。</p></button><button id="boxB" class="card" style="cursor:pointer"><h3>B 箱</h3><p>点击检查。</p></button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:10,puzzle:2,review:true});
+    $('#boxA').onclick=()=>{state.finalBoxSelected='A';saveState();status($('#st'),'2025 ARCHIVE BACKUP。文件版本过旧。不会失败，旁边还有另一只箱子。');};
+    $('#boxB').onclick=()=>{state.finalBoxSelected='B';solve(10,2,'B 箱','第八局碎片提示 A 为旧版本、二周年联合授权器转入 B；第九局写入记录也指向 B 箱。');saveState();puzzleDoneMessageAfterExistingSolve(10,2,'B 箱确认：二周年联合授权器所在箱。');renderScene();};
+  }else if(p===3){
+    if(!state.solved[10][1])return toast('先确认正确的存档箱。','bad');
+    setModal('谜题 3 · B 箱五槽密码','五个两位数字轮。每个人都做：生日月份 + 第九局组权重总和。',`<div class="grid five">${MEMBER_ORDER.map(id=>`<div class="card"><h3>${MEMBERS[id].name}</h3><input id="v_${id}" class="numInput" type="number" min="0" max="99" value="0"></div>`).join('')}</div><div style="margin-top:12px"><button id="submit" class="primary">打开 B 箱</button><div id="st" class="answerStatus"></div></div>`,'wide',{hints:true,scene:10,puzzle:3,review:true});
+    const exp=[28,22,31,26,12]; $('#submit').onclick=()=>{const vals=MEMBER_ORDER.map(id=>Number($(`#v_${id}`).value));if(vals.join(',')===exp.join(',')){solve(10,3,'28 - 22 - 31 - 26 - 12','生日月份 11/04/02/05/01 + 第九局权重 17/18/29/21/11。');state.archiveKeyObtained=true;saveState();renderScene();puzzleDoneMessageAfterExistingSolve(10,3,'B 箱打开。获得【联合档案授权器】。');}else status($('#st'),'五个两位数字轮没有全部对应。');};
+  }else if(p===4){
+    if(!state.archiveKeyObtained)return toast('先打开 B 箱取得联合档案授权器。','bad');
+    setModal('谜题 4 · 第六个人是谁','授权器插入终端。请为 ARCHIVE 06 输入名称。',`<div class="puzzleIntro">这不是数字题。五个人都已经有自己的独立档案。</div><div class="inputRow"><input id="answer" class="textInput" maxlength="12" placeholder="输入正式档案名称"><button id="submit" class="primary">IDENTIFY</button></div><div id="st" class="answerStatus"></div>`,'small',{hints:true,scene:10,puzzle:4,review:true});
+    $('#submit').onclick=()=>{const a=$('#answer').value.trim();if(['朱志鑫','张泽禹','张极','左航','苏新皓'].includes(a)){status($('#st'),'该成员已经拥有独立档案。');return;}if(a==='我们'){status($('#st'),'方向正确。请填写正式档案名称。');return;}if(a==='第六个人'){status($('#st'),'不存在第六个人。');return;}if(a==='工作人员'){status($('#st'),'也不是。');return;}if(a==='粉丝'){status($('#st'),'……这份档案里确实有你们留下的内容。但这里要填的是正式名称。');return;}if(a==='登陆少年'){solve(10,4,'登陆少年','ARCHIVE 06 IDENTIFIED · JOINT PROFILE RESTORED · STAGE AUTHORIZATION：UNLOCKED。');state.stageUnlocked=true;state.sceneComplete[10]=true;saveState();renderScene();setModal('ARCHIVE 06 IDENTIFIED','JOINT PROFILE RESTORED · STAGE AUTHORIZATION：UNLOCKED',`<div class="puzzleIntro">舞台门已经打开。你可以先继续搜索镜后区域，收集最后的剧情碎片，再前往舞台。</div><div class="inputRow"><button id="stay" class="secondary">继续搜索</button><button id="stage" class="primary">前往舞台</button></div>`,'small',{review:true});$('#stay').onclick=closeModal;$('#stage').onclick=showEnding;}else status($('#st'),'终端没有识别这个正式档案名称。');};
+  }
+}
+function puzzleDoneMessageAfterExistingSolve(scene,p,msg){
+  setModal(`${SCENES[scene].puzzles[p-1]} · 通过`,msg,`<div class="puzzleIntro">结果已写入回看记录。继续处理镜后档案架。</div><button id="hub" class="primary">返回解谜终端</button>`,'small',{review:true});
+  $('#hub').onclick=()=>openPuzzleHub(scene);
+}
+
+const FULL_STORY = `二周年筹备开始以后，工作人员原本只想重新整理五个人的成员档案。
+
+姓名。生日。星座。MBTI。出生地。爱好。
+
+这些东西很快就整理完了。五个人每个人都有一份非常完整的档案。
+
+但整理过程中，有人突然发现一个问题。
+
+这些资料可以非常准确地介绍：朱志鑫是谁，张泽禹是谁，张极是谁，左航是谁，苏新皓是谁。
+
+可是把五份资料放在一起以后，却依然很难回答一个问题：登陆少年是什么？
+
+因为“组合”并不是五张个人简历拼在一起。
+
+于是二周年资料组又增加了一份特殊档案。不记录个人属性，只记录他们之间发生过什么。
+
+有人和谁住过一间房。有人和谁属于同一个三人组。有人说过什么只有熟悉的人才知道是谁说的怪话。有人玩过什么奇怪的黑洞游戏。有人在爱情主题里出现。有人在友情主题里出现。有人在亲情主题里出现。
+
+有人的宠物是三个。有人有九个耳洞。有人有姐姐。有人有弟弟。有人属于体力组。有人属于脑力组。有人穿领带和长裤。有人穿领结和短裤。
+
+单独看这些信息，全都很零散，甚至有一点莫名其妙。
+
+但只要开始交叉：一个人会逐渐变得唯一。两个人之间会出现一条线。三个人会组成一段共同经历。五个人的线最后会连接成一张完整的图。
+
+这就是：第六份档案。
+
+原本，这份档案只是二周年后台物料的一部分。工作人员打算把它做成一个轻量互动小游戏。
+
+可在 8 月 28 日下午进行后台系统升级时，新的归档程序把“联合档案完整度”错误地加入了正式舞台授权条件。
+
+系统开始认为：如果 ARCHIVE 06 没有完成，那么二周年资料包就是“不完整”。于是舞台授权被自动冻结。
+
+没有人恶作剧。没有黑客。也没有人故意把舞台锁起来。
+
+十个房间里的谜题，其实全部来自当初测试“联合档案”时留下的数据。
+
+所以有：分房、三人组、26 键、登言登语、耳洞、宠物、兄弟姐妹、黑洞游戏、《无所畏惧》、爱情、友情和亲情。
+
+那些看起来最不像“正式档案”的东西，恰恰成为了系统判断“他们是不是他们”最重要的数据。`;
+
+function showEnding(){
+  closeModal();
+  sceneBg.src='assets/backgrounds/bg12.jpg'; hotspots.innerHTML=''; $('#sceneCanvas').classList.add('endingGlow');
+  const complete=state.fragments.length===30;
+  if(complete){
+    $('#clockTime').textContent='00:00'; $('#clockDate').textContent='2026.08.29';
+    $('#endingOverlay').innerHTML=`<div class="endingPanel"><div class="eyebrow">MEMORY RECORDS</div><h1>30 / 30</h1><h2>完整记录已具备恢复条件</h2><p>话筒不在这次故事里。最终需要恢复的，是第六份联合身份档案。</p><div class="lightBars"><i></i><i></i><i></i><i></i><i></i></div><div class="endingActions"><button id="restoreMemory" class="primary big">恢复原始记录</button><button id="backCollect" class="secondary">返回场景</button></div></div>`;
+    $('#endingOverlay').classList.remove('hidden');
+    $('#restoreMemory').onclick=showCompleteEnding;
+    $('#backCollect').onclick=leaveEnding;
+  }else{
+    state.normalEnding=true; saveState();
+    $('#clockTime').textContent='23:58'; $('#clockDate').textContent='2026.08.28';
+    $('#endingOverlay').innerHTML=`<div class="endingPanel"><div class="eyebrow">ARCHIVE 06 · RECOVERED</div><h1>登陆少年</h1><h2>STAGE READY</h2><p>系统重新载入二周年特别影像。后台终于恢复。</p><p>舞台资料系统之所以锁定，是因为“联合身份档案”缺少了大量关系字段；经过十个房间，资料被重新补齐。</p><p class="gold">五份档案已经够完整。<br>但第六份档案，必须五个人一起才能写完。</p><div class="divider"></div><h2>普通结局 · 第六份档案</h2><p>当前剧情碎片：${state.fragments.length} / 30。仍可返回前面的房间补收集。</p><div class="endingActions"><button id="backCollect" class="primary">返回补收集</button><button id="archiveEnd" class="secondary">查看联合档案</button></div></div>`;
+    $('#endingOverlay').classList.remove('hidden');
+    $('#backCollect').onclick=leaveEnding;
+    $('#archiveEnd').onclick=()=>{ $('#endingOverlay').classList.add('hidden'); renderScene(); openArchive(); };
+  }
+}
+function leaveEnding(){ $('#endingOverlay').classList.add('hidden'); renderScene(); }
+function showCompleteEnding(){
+  state.completeEnding=true; saveState();
+  $('#endingOverlay').innerHTML=`<div class="endingPanel"><div class="eyebrow">2026.08.29 · 00:00</div><h1>ARCHIVE 06</h1><h2>登陆少年</h2><div class="memoryStory">${escapeHtml(FULL_STORY)}</div><div class="divider"></div><p class="endingCode">字段类型：联合身份　/　成员数量：5　/　状态：持续更新中</p><p>这份档案永远不会真正完成。<br>因为他们还会继续产生新的答案。</p><div class="lightBars"><i></i><i></i><i></i><i></i><i></i></div><h1 style="font-size:25px">二周年快乐。</h1><h2>第六份档案，请继续一起写。</h2><p class="gold">完整结局：《我们》</p><div class="divider"></div><p>“个人资料记录一个人，回忆才记录我们。”</p><div class="endingActions"><button id="backCollect" class="secondary">返回场景</button><button id="restart" class="ghost">重新开始</button></div></div>`;
+  $('#backCollect').onclick=leaveEnding; $('#restart').onclick=()=>{ if(confirm('确定清空全部进度重新开始吗？')) resetState(); };
+}
+
+function openBgm(){
+  const a=$('#bgmAudio');
+  setModal('BGM','音频文件固定读取项目根目录的 bgm.mp3。浏览器要求在用户交互后才能播放声音。',`<div class="bgmPanel"><button id="toggleBgm" class="primary">${a.paused?'播放 BGM':'暂停 BGM'}</button><div><div class="label">音量</div><input id="vol" class="volumeRange" type="range" min="0" max="1" step="0.01" value="${state.bgmVolume}"></div></div><div class="divider"></div><p class="tiny">如果以后要换音乐，只需用新的音频覆盖根目录 <b>bgm.mp3</b>，无需修改代码。</p>`,'small',{review:false});
+  $('#toggleBgm').onclick=async()=>{ if(a.paused){state.bgmOn=true;await playBgm();$('#toggleBgm').textContent='暂停 BGM';}else{a.pause();state.bgmOn=false;saveState();updateHud();$('#toggleBgm').textContent='播放 BGM';} };
+  $('#vol').oninput=e=>{state.bgmVolume=Number(e.target.value);a.volume=state.bgmVolume;saveState();};
+}
+async function playBgm(){
+  const a=$('#bgmAudio'); a.volume=state.bgmVolume;
+  try{await a.play();state.bgmOn=true;saveState();updateHud();}catch(e){state.bgmOn=false;saveState();toast('浏览器暂时阻止了自动播放。点击 BGM 按钮即可手动开启。','info');}
+}
+
+$('#puzzleHubBtn').onclick=()=>openPuzzleHub();
+$('#reviewBtn').onclick=openReview;
+$('#archiveBtn').onclick=openArchive;
+$('#mapBtn').onclick=openMap;
+$('#bgmBtn').onclick=openBgm;
+$('#bgmAudio').addEventListener('play',updateHud); $('#bgmAudio').addEventListener('pause',updateHud); $('#bgmAudio').addEventListener('error',()=>toast('未读取到 bgm.mp3，请确认文件位于项目根目录。','bad'));
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#endingOverlay').classList.contains('hidden'))leaveEnding();else if(!modalOverlay.classList.contains('hidden'))closeModal();}});
+
+function beginGame(newGame=false){
+  if(newGame){state=freshState();saveState();}
+  $('#introOverlay').classList.add('hidden');
+  renderScene();
+  if(state.bgmOn) playBgm();
+  setTimeout(()=>toast('提示：所有已解谜题都会自动写入“回看记录”。组合题不用硬记。','info'),550);
+}
+
+$('#startGameBtn').onclick=()=>beginGame(true);
+$('#continueGameBtn').onclick=()=>beginGame(false);
+$('#resetGameBtn').onclick=()=>{if(confirm('确定清空全部密室进度吗？'))resetState();};
+
+function init(){
+  const saved=hasSave();
+  $('#continueGameBtn').classList.toggle('hidden',!saved);
+  $('#resetGameBtn').classList.toggle('hidden',!saved);
+  $('#startGameBtn').textContent=saved?'开始新游戏':'进入第一局';
+  const a=$('#bgmAudio'); a.volume=state.bgmVolume;
+  renderScene(); updateHud();
+}
+init();
