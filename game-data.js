@@ -1,6 +1,6 @@
 window.GAME_DATA = (() => {
   const members = [
-    { id:'zzx', name:'朱志鑫', image:'assets/members/zhuzhixin.jpg', english:'Twenty-two X', month:11, day:19, mbti:'INFP', city:'重庆', ear:9, sibling:0 },
+    { id:'zzx', name:'朱志鑫', image:'assets/members/zhuzhixin.jpg', english:'Twenty-two X', month:11, day:19, mbti:'INFP', city:'重庆', ear:7, sibling:0 },
     { id:'zh', name:'左航', image:'assets/members/zuohang.jpg', english:'LEFT', month:5, day:22, mbti:'INFP', city:'重庆', ear:2, sibling:0 },
     { id:'zzy', name:'张泽禹', image:'assets/members/zhangzeyu.jpg', english:'ZACK / B.A.O', month:4, day:30, mbti:'ESTJ', city:'哈尔滨', ear:0, sibling:0 },
     { id:'zj', name:'张极', image:'assets/members/zhangji.jpg', english:'Jeremy', month:2, day:3, mbti:'INFP', city:'常州', ear:0, sibling:1 },
@@ -16,7 +16,7 @@ window.GAME_DATA = (() => {
     {id:6,title:'五首舞台',image:'assets/backgrounds/scene06_stage_planning.png',objective:'不要只数出现次数。先用问题选人，再读取次数。',theme:'stageplan'},
     {id:7,title:'从哪里来到这里',image:'assets/backgrounds/scene07_city_route.png',objective:'三个出发城市，五条线，最后都指向同一个地方。',theme:'route'},
     {id:8,title:'不背曲序',image:'assets/backgrounds/scene08_filter_focus.png',objective:'筛选标题结构。',theme:'filter'},
-    {id:,title:'润！闷。哈？哟～',image:'assets/backgrounds/scene0_voice_control.png',objective:'26 键。',theme:'voice'},
+    {id:9,title:'润！闷。哈？哟～',image:'assets/backgrounds/scene0_voice_control.png',objective:'26 键。',theme:'voice'},
     {id:10,title:'共同名字',image:'assets/backgrounds/scene10_front.jpg',backImage:'assets/backgrounds/scene10_back.jpg',objective:'不是任何一个人的名字，是五个人共同使用的名字。',theme:'final'}
   ];
 
