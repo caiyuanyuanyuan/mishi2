@@ -10,13 +10,13 @@ window.GAME_DATA = (() => {
   const scenes = [
     {id:1,title:'五份档案',image:'assets/backgrounds/scene01_memory_verify.png',objective:'先确认，你认得的是五个人，不是五张脸。',theme:'archive'},
     {id:2,title:'强花壮香锤',image:'assets/backgrounds/scene02_role_focus.png',objective:'先叫角色名，再记关系。',theme:'warm'},
-    {id:3,title:'0、2、9',image:'assets/backgrounds/scene03_personal_lockers.jpg',objective:'小细节被拆开后，会重新变成一条可读的顺序。',theme:'locker'},
+    {id:3,title:'0、2、7',image:'assets/backgrounds/scene03_personal_lockers.jpg',objective:'小细节被拆开后，会重新变成一条可读的顺序。',theme:'locker'},
     {id:4,title:'两张表叠在一起',image:'assets/backgrounds/scene04_double_tag.png',objective:'两层分类还不够，第三个条件才能让每个人唯一。',theme:'logic'},
     {id:5,title:'谁说的，谁玩的，谁最……',image:'assets/backgrounds/scene05_review_room.jpg',objective:'一句话不够。至少三条线索都对上，才算同一个人。',theme:'review'},
     {id:6,title:'五首舞台',image:'assets/backgrounds/scene06_stage_planning.png',objective:'不要只数出现次数。先用问题选人，再读取次数。',theme:'stageplan'},
     {id:7,title:'从哪里来到这里',image:'assets/backgrounds/scene07_city_route.png',objective:'三个出发城市，五条线，最后都指向同一个地方。',theme:'route'},
     {id:8,title:'不背曲序',image:'assets/backgrounds/scene08_filter_focus.png',objective:'筛选标题结构。',theme:'filter'},
-    {id:9,title:'润！闷。哈？哟～',image:'assets/backgrounds/scene09_voice_control.png',objective:'26 键。',theme:'voice'},
+    {id:,title:'润！闷。哈？哟～',image:'assets/backgrounds/scene0_voice_control.png',objective:'26 键。',theme:'voice'},
     {id:10,title:'共同名字',image:'assets/backgrounds/scene10_front.jpg',backImage:'assets/backgrounds/scene10_back.jpg',objective:'不是任何一个人的名字，是五个人共同使用的名字。',theme:'final'}
   ];
 
@@ -32,7 +32,7 @@ window.GAME_DATA = (() => {
       {title:'不是房号，是关系',sub:'统计三天里每个人一共拥有过几个不同室友。',hints:['房间号码没有意义。','把三天放在一起，数“不同的人”。','“强”只有 1 个不同室友，“花”有 2 个。']}
     ],
     3:[
-      {title:'耳洞数量',sub:'把五个人的耳洞数填回个人柜。',hints:['这里只有一个人的数字明显很大。','左航不是 0。','朱志鑫 9、左航 2，其余三人 0。']},
+      {title:'耳洞数量',sub:'把五个人的耳洞数填回个人柜。',hints:['这里只有一个人的数字明显很大。','左航不是 0。','朱志鑫 7、左航 2，其余三人 0。']},
       {title:'家里还有兄弟姐妹吗',sub:'本机关有兄弟姐妹记 1，没有记 0。',hints:['只有两个人记 1。','两个人分别有姐姐和弟弟。','张极 1、苏新皓 1，其余 0。']},
       {title:'谁先进入 26 键',sub:'先排序，再取英文名首字母在 QWERTY 的连续编号。',hints:['先别看键盘，先确定五个人应该按照什么顺序进入。','0 个耳洞的人继续用“手足”和生日月份排序。','顺序：朱志鑫、左航、苏新皓、张极、张泽禹。']}
     ],
@@ -91,7 +91,7 @@ window.GAME_DATA = (() => {
   const archive = {
     1:{title:'五份档案',items:['英文名对应关系','生日月份读取顺序：苏新皓 → 张极 → 张泽禹 → 左航 → 朱志鑫','MBTI 的 J / P 读取规则','家乡：重庆 / 常州 / 哈尔滨']},
     2:{title:'强花壮香锤',items:['强=张极=爸爸；花=张泽禹=妈妈；壮=朱志鑫=弟弟；香=苏新皓=姐姐；锤=左航=团宠','三天室友关系','每个人拥有过的不同室友数量可由三天关系重新统计']},
-    3:{title:'个人档案柜',items:['耳洞：朱志鑫 9、左航 2、张泽禹 0、张极 0、苏新皓 0','手足：张极 1、苏新皓 1，其余记 0','已确认成员读取顺序：朱志鑫 → 左航 → 苏新皓 → 张极 → 张泽禹','QWERTY 26 键连续编号规则']},
+    3:{title:'个人档案柜',items:['耳洞：朱志鑫 7、左航 2、张泽禹 0、张极 0、苏新皓 0','手足：张极 1、苏新皓 1，其余记 0','已确认成员读取顺序：朱志鑫 → 左航 → 苏新皓 → 张极 → 张泽禹','QWERTY 26 键连续编号规则']},
     4:{title:'双标签站位',items:['领带/长裤：左航、张极、朱志鑫；领结/短裤：张泽禹、苏新皓','体力：朱志鑫、张极、苏新皓；脑力：张泽禹、左航','两层分类无法唯一时需要叠加星座']},
     5:{title:'综合复盘',items:['语录、最……标签、黑洞游戏必须三条线索同时对上','最直的人=左航；没办法=朱志鑫','黑洞游戏读取顺序：朱志鑫 → 苏新皓 → 张极 → 左航 → 张泽禹']},
     6:{title:'五首舞台',items:['爱情=朱志鑫+苏新皓；友情=左航+苏新皓；亲情=张极+张泽禹','舞台出现次数：朱志鑫 2、张泽禹 3、张极 4、左航 3、苏新皓 3','最终读取必须先按条件选人，再读取次数']},
@@ -210,7 +210,7 @@ window.GAME_DATA = (() => {
     director:[
       '九年前，他们从三个不同的城市出发。重庆。哈尔滨。常州。',
       '后来五条不同的线，全都落在了同一个地方。',
-      '有人慢慢有了九个耳洞。有人家里有姐姐。有人家里有弟弟。',
+      '有人慢慢有了七个耳洞。有人家里有姐姐。有人家里有弟弟。',
       '有的人穿领带，有的人穿领结；有人被归进体力组，有人被归进脑力组。',
       '他们在节目里变成过爸爸、妈妈、弟弟、姐姐和团宠。三天里换过房间，和不同的人做过室友。',
       '他们说过后来回头看自己都觉得莫名其妙的话，玩过憋笑、认过漫威英雄、摸过恐怖箱、蒙着眼睛踢过足球，也试过什么都不能做。',
