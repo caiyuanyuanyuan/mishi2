@@ -394,7 +394,7 @@
       if(box!=='B'){feedback(mount.querySelector('#fb'),'这个标记有点眼熟，也许以前在哪里见过。');return;}
       const mapOk=icons.every(([,id],i)=>mount.querySelector(`.icon-member[data-i="${i}"]`).value===id);
       if(!mapOk){feedback(mount.querySelector('#fb'),'这个人的另外两条信息好像对不上。先把五个图标准确还原成五个人。');return;}
-      if(normCode(mount.querySelector('#code').value)==='12109') finishAndRefresh(10,1,'MASTER ARCHIVE 已解锁'); else feedback(mount.querySelector('#fb'),'成员顺序已经对了，但数字校验没有通过。回看第三局的耳洞与手足。');
+      if(normCode(mount.querySelector('#code').value)==='12107') finishAndRefresh(10,1,'MASTER ARCHIVE 已解锁'); else feedback(mount.querySelector('#fb'),'成员顺序已经对了，但数字校验没有通过。回看第三局的耳洞与手足。');
     };
   }
   function puzzleS10P3(mount){
