@@ -323,7 +323,7 @@
   function puzzleS6P4(mount){
     mount.insertAdjacentHTML('beforeend',`<div class="rule-card">第三题得到的次数表只是“读取表”。下面五个问题都先用集合关系选出成员，再读取他的出现次数。<br>A = 爱情组成员集合;B = 友情组成员集合;C = 亲情组成员集合;cnt(x)：成员x的舞台出现次数</div><div class="grid two">
       <div class="question-card"><span class="math">① cnt(A∩B) = ?</span><br>爱情组和友情组共同出现的人的舞台次数</div>
-      <div class="question-card"><span class="math">② cnt(A-B) = ?</span><br>友情组中、不属于爱情组的人的舞台次数</div>
+      <div class="question-card"><span class="math">② cnt(B-A) = ?</span><br>友情组中、不属于爱情组的人的舞台次数</div>
       <div class="question-card"><span class="math">③ C = {x1,x2} max(cnt(x1),cnt(x2))</span><br>亲情组两人里，五首舞台出现次数更多的</div>
       <div class="question-card"><span class="math">④ A = {y1,y2} min(cnt(y1),cnt(y2))</span><br>爱情组里出现次数更少的人</div>
       <div class="question-card"><span class="math">⑤ 设全体成员全集为U max<sub>x∈U</sub> cnt(x)</span><br>取全体最多者的舞台次数</div>
@@ -375,7 +375,7 @@
     mount.querySelector('#verify').onclick=()=>{if(normCode(mount.querySelector('#letters').value)==='rmhy') finishAndRefresh(9,0,'R / M / H / Y 已确认'); else feedback(mount.querySelector('#fb'),'不要读声调。看四个字的拼音首字母。');};
   }
   function puzzleS9P3(mount){
-    mount.insertAdjacentHTML('beforeend',`<div class="rule-card">标点运算卡：<br><b>！ = 取列　。 = 取行　？ = 行 + 列　～ = 列 - 行</b></div><div class="grid four" style="grid-template-columns:repeat(4,1fr)"><div class="input-row" style="margin-top:12px"><input id="code" class="code-input" placeholder="4 位结果"><button id="verify" class="verify-btn">定位镜后区域</button></div><div id="fb" class="feedback"></div>`);
+    mount.insertAdjacentHTML('beforeend',`<div class="rule-card">标点运算卡：<br><b>！ = 取列　。 = 取行　？ = 行 + 列　～ = 列 - 行</b></div><div class="input-row" style="margin-top:12px"><input id="code" class="code-input" placeholder="4 位结果"><button id="verify" class="verify-btn">定位镜后区域</button></div><div id="fb" class="feedback"></div>`);
     mount.querySelector('#verify').onclick=()=>{if(normCode(mount.querySelector('#code').value)==='4276') finishAndRefresh(9,2,'镜后 B 柜 · MASTER 已定位'); else feedback(mount.querySelector('#fb'),'校验没有通过。');};
   }
 
