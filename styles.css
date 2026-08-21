@@ -556,7 +556,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   .drop-row{grid-template-columns:90px 1fr}
 }
 
-/* ========== 竖屏检测：用宽高比替代orientation，更精准 ========== */
+/* ========== 竖屏检测：用宽高比替代orientation========== */
 @media (max-aspect-ratio: 1/1) and (max-width: 900px){
   .portrait-warning{display:grid}
 }
