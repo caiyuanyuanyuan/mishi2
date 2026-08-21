@@ -190,7 +190,7 @@
     if(key==='2-0') return puzzleS2P1(mount,done);
     if(key==='2-1') return puzzleS2P2(mount,done);
     if(key==='2-2') return simpleCode(mount,2,2,'按“强 花 壮 香 锤”读取每个人拥有过的不同室友数量。','12111');
-    if(key==='3-0') return numberTable(mount,3,0,'耳洞数量',{zzx:9,zh:2,zzy:0,zj:0,sxh:0});
+    if(key==='3-0') return numberTable(mount,3,0,'耳洞数量',{zzx:7,zh:2,zzy:0,zj:0,sxh:0});
     if(key==='3-1') return numberTable(mount,3,1,'有兄弟姐妹记 1，没有记 0',{zzx:0,zh:0,zzy:0,zj:1,sxh:1});
     if(key==='3-2') return puzzleS3P3(mount,done);
     if(key==='4-0') return groupSelect(mount,4,0,'第一张分类表',['领带 / 长裤','领结 / 短裤'],{zzx:0,zh:0,zzy:1,zj:0,sxh:1});
