@@ -42,4 +42,156 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 @keyframes mirrorShift{0%{clip-path:inset(0 0 0 0);filter:brightness(1)}55%{clip-path:inset(0 0 0 45%);filter:brightness(.55)}100%{clip-path:inset(0 0 0 100%);filter:brightness(.2)}}
 @media(max-width:900px){.scene-stage{width:min(100vw,calc((100vh - 56px) * 16 / 9))}.hud{height:56px;padding:7px 9px}.brand{min-width:170px}.brand-mark{width:34px;height:34px}.brand strong{font-size:13px}.brand small{font-size:8px}.hud-btn{padding:7px 9px;font-size:10px}#gameRoot{inset:56px 0 0}.scene-header-card{left:10px;top:9px}.scene-header-card h2{font-size:18px}.scene-header-card p{font-size:10px}.scene-progress{left:10px;bottom:10px}.scene-next{right:10px;bottom:10px}.modal-body{padding:14px}.grid.five{grid-template-columns:repeat(5,1fr)}.assignment{grid-template-columns:1fr}.scene-map-grid{grid-template-columns:repeat(5,1fr)}.scene-tile{padding:8px;min-height:82px}.scene-tile strong{font-size:11px}.scene-tile small{font-size:9px}}
 @media(max-width:680px){.brand small{display:none}.brand{min-width:120px}.grid.five{grid-template-columns:repeat(3,1fr)}.grid.three{grid-template-columns:1fr 1fr}.scene-map-grid{grid-template-columns:repeat(2,1fr)}.pair-grid{grid-template-columns:1fr}.drop-row{grid-template-columns:90px 1fr}}
-@media(orientation:portrait) and (max-width:900px){.portrait-warning{display:grid}}
+/* ------------------------------------------------------------------
+   手机横屏兼容
+   ------------------------------------------------------------------
+   部分手机（尤其开启“方向锁定”或浏览器不支持 orientation lock 时）
+   物理横过手机后，CSS 仍会判断为 portrait。这里不再用全屏遮罩阻断游戏，
+   而是把整个游戏壳旋转 90°，让玩家即使在“系统不切横屏”的情况下也能
+   横着拿手机正常游玩。
+------------------------------------------------------------------- */
+
+/* 真正已经进入横屏的手机：优先把场景铺满可用区域，保持热点与背景同比例伸缩。 */
+@media (orientation:landscape) and (max-height:500px){
+  .scene-stage{
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    aspect-ratio:auto;
+  }
+  .scene-stage img.bg{object-fit:fill}
+  .start-screen{overflow:auto;padding:8px 0}
+  .start-card{width:min(760px,92vw);padding:16px 20px;margin:8px auto}
+  .start-title{font-size:30px;margin:6px 0 2px}
+  .terminal{margin:10px 0;padding:10px 12px;line-height:1.45;font-size:11px}
+  .start-meta{margin-top:8px}
+  .primary,.secondary,.ghost,.chip-btn{padding:8px 12px;font-size:11px}
+  .modal{max-height:calc(100vh - 18px)}
+  .ending-lines{max-height:calc(100vh - 170px)}
+}
+
+/* 系统/浏览器仍报告 portrait 时，启用“横屏模拟”。 */
+@media (orientation:portrait) and (max-width:900px){
+  html,body{
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    min-width:100vw;
+    min-height:100vh;
+    min-height:100dvh;
+    overflow:hidden;
+    overscroll-behavior:none;
+    touch-action:manipulation;
+  }
+
+  body{
+    position:fixed;
+    inset:0;
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+
+  /* 关键：交换宽高并顺时针旋转。视觉尺寸变成“长边 × 短边”。 */
+  .app-shell{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vh;
+    width:100dvh;
+    height:100vw;
+    height:100dvw;
+    max-width:none;
+    max-height:none;
+    transform-origin:0 0;
+    transform:translateX(100vw) rotate(90deg);
+    overflow:hidden;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+  }
+
+  /* 不再用“请横屏体验”遮住整个游戏。 */
+  .portrait-warning{display:none!important}
+
+  /* 旋转后可视宽度来自原来的 vh，因此涉及 vw/vh 的组件要同步交换。 */
+  .scene-stage{
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    aspect-ratio:auto;
+  }
+  .scene-stage img.bg{object-fit:fill}
+
+  .scene-header-card{max-width:min(430px,48dvh)}
+
+  .start-screen{
+    overflow:auto;
+    align-items:start;
+    padding:8px 0;
+  }
+  .start-card{
+    width:min(760px,92vh);
+    width:min(760px,92dvh);
+    padding:16px 20px;
+    margin:8px auto;
+  }
+  .start-title{font-size:30px;margin:6px 0 2px}
+  .start-sub{font-size:11px}
+  .terminal{margin:10px 0;padding:10px 12px;line-height:1.45;font-size:11px}
+  .start-meta{margin-top:8px}
+  .primary,.secondary,.ghost,.chip-btn{padding:8px 12px;font-size:11px}
+
+  .modal-backdrop{padding:10px}
+  .modal{
+    width:min(940px,calc(100vh - 20px));
+    width:min(940px,calc(100dvh - 20px));
+    max-height:calc(100vw - 20px);
+    max-height:calc(100dvw - 20px);
+  }
+  .modal.narrow{
+    width:min(620px,calc(100vh - 24px));
+    width:min(620px,calc(100dvh - 24px));
+  }
+  .modal.wide{
+    width:min(1120px,calc(100vh - 16px));
+    width:min(1120px,calc(100dvh - 16px));
+  }
+  .modal-head{padding:12px 48px 10px 14px}
+  .modal-head h3{font-size:18px}
+  .modal-body{padding:12px}
+
+  /* 之前 max-width:680 会把这些布局强行变成“竖屏版”，横屏模拟时恢复横向布局。 */
+  .grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .pair-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .scene-map-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+  .master-card .ssd{
+    width:min(340px,70vh);
+    width:min(340px,70dvh);
+  }
+  .stage-panel{
+    width:min(850px,92vh);
+    width:min(850px,92dvh);
+    padding:14px;
+  }
+  .stage-panel h2{font-size:24px}
+  .ending-lines{
+    max-height:calc(100vw - 150px);
+    max-height:calc(100dvw - 150px);
+  }
+
+  .toast-stack{
+    width:min(360px,calc(100vh - 32px));
+    width:min(360px,calc(100dvh - 32px));
+    right:12px;
+    bottom:12px;
+  }
+
+  /* 手机触控优化：取消蓝色点击高亮，按钮点击更稳定。 */
+  button,.hotspot,.token,.drop-zone,.quote-card,.toggle-member,.scene-tile{
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+}
